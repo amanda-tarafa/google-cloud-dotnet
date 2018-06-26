@@ -1,0 +1,1424 @@
+﻿// Copyright 2018 Google Inc. All Rights Reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+namespace Google.Cloud.Compute.Prototype
+{
+    public class AcceleratorTypesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal AcceleratorTypesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.AcceleratorTypesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.AcceleratorType GetAcceleratorType(string project, string zone, string acceleratorType, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.AcceleratorTypesResource.GetRequest request = Client.InternalService.AcceleratorTypes.Get(project, zone, acceleratorType);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class AddressesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal AddressesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.AddressesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Address GetAddress(string project, string region, string address, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.AddressesResource.GetRequest request = Client.InternalService.Addresses.Get(project, region, address);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class AutoscalersClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal AutoscalersClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.AutoscalersResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Autoscaler GetAutoscaler(string project, string zone, string autoscaler, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.AutoscalersResource.GetRequest request = Client.InternalService.Autoscalers.Get(project, zone, autoscaler);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class BackendBucketsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal BackendBucketsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.BackendBucketsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.BackendBucket GetBackendBucket(string project, string backendBucket, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.BackendBucketsResource.GetRequest request = Client.InternalService.BackendBuckets.Get(project, backendBucket);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class BackendServicesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal BackendServicesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.BackendServicesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.BackendService GetBackendService(string project, string backendService, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.BackendServicesResource.GetRequest request = Client.InternalService.BackendServices.Get(project, backendService);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class GetHealthOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.BackendServicesResource.GetHealthRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.BackendServiceGroupHealth GetHealth(Google.Apis.Compute.v1.Data.ResourceGroupReference resourceGroupReferenceEntity, string project, string backendService, GetHealthOptions options = null)
+        {
+            Google.Apis.Compute.v1.BackendServicesResource.GetHealthRequest request = Client.InternalService.BackendServices.GetHealth(resourceGroupReferenceEntity, project, backendService);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class DiskTypesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal DiskTypesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.DiskTypesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.DiskType GetDiskType(string project, string zone, string diskType, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.DiskTypesResource.GetRequest request = Client.InternalService.DiskTypes.Get(project, zone, diskType);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class DisksClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal DisksClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.DisksResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Disk GetDisk(string project, string zone, string disk, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.DisksResource.GetRequest request = Client.InternalService.Disks.Get(project, zone, disk);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class FirewallsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal FirewallsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.FirewallsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Firewall GetFirewall(string project, string firewall, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.FirewallsResource.GetRequest request = Client.InternalService.Firewalls.Get(project, firewall);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class ForwardingRulesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal ForwardingRulesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.ForwardingRulesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.ForwardingRule GetForwardingRule(string project, string region, string forwardingRule, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.ForwardingRulesResource.GetRequest request = Client.InternalService.ForwardingRules.Get(project, region, forwardingRule);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class GlobalAddressesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal GlobalAddressesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.GlobalAddressesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Address GetAddress(string project, string address, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.GlobalAddressesResource.GetRequest request = Client.InternalService.GlobalAddresses.Get(project, address);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class GlobalForwardingRulesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal GlobalForwardingRulesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.GlobalForwardingRulesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.ForwardingRule GetForwardingRule(string project, string forwardingRule, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.GlobalForwardingRulesResource.GetRequest request = Client.InternalService.GlobalForwardingRules.Get(project, forwardingRule);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class GlobalOperationsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal GlobalOperationsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class DeleteOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.GlobalOperationsResource.DeleteRequest request)
+            {
+
+            }
+        }
+        public string Delete(string project, string operation, DeleteOptions options = null)
+        {
+            Google.Apis.Compute.v1.GlobalOperationsResource.DeleteRequest request = Client.InternalService.GlobalOperations.Delete(project, operation);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class HealthChecksClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal HealthChecksClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.HealthChecksResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.HealthCheck GetHealthCheck(string project, string healthCheck, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.HealthChecksResource.GetRequest request = Client.InternalService.HealthChecks.Get(project, healthCheck);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class HttpHealthChecksClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal HttpHealthChecksClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.HttpHealthChecksResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.HttpHealthCheck GetHttpHealthCheck(string project, string httpHealthCheck, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.HttpHealthChecksResource.GetRequest request = Client.InternalService.HttpHealthChecks.Get(project, httpHealthCheck);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class HttpsHealthChecksClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal HttpsHealthChecksClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.HttpsHealthChecksResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.HttpsHealthCheck GetHttpsHealthCheck(string project, string httpsHealthCheck, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.HttpsHealthChecksResource.GetRequest request = Client.InternalService.HttpsHealthChecks.Get(project, httpsHealthCheck);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class ImagesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal ImagesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.ImagesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Image GetImage(string project, string image, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.ImagesResource.GetRequest request = Client.InternalService.Images.Get(project, image);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class GetFromFamilyOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.ImagesResource.GetFromFamilyRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Image GetFromFamily(string project, string family, GetFromFamilyOptions options = null)
+        {
+            Google.Apis.Compute.v1.ImagesResource.GetFromFamilyRequest request = Client.InternalService.Images.GetFromFamily(project, family);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class InstanceGroupManagersClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal InstanceGroupManagersClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.InstanceGroupManagersResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.InstanceGroupManager GetInstanceGroupManager(string project, string zone, string instanceGroupManager, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.InstanceGroupManagersResource.GetRequest request = Client.InternalService.InstanceGroupManagers.Get(project, zone, instanceGroupManager);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class InstanceGroupsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal InstanceGroupsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.InstanceGroupsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.InstanceGroup GetInstanceGroup(string project, string zone, string instanceGroup, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.InstanceGroupsResource.GetRequest request = Client.InternalService.InstanceGroups.Get(project, zone, instanceGroup);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class InstanceTemplatesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal InstanceTemplatesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.InstanceTemplatesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.InstanceTemplate GetInstanceTemplate(string project, string instanceTemplate, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.InstanceTemplatesResource.GetRequest request = Client.InternalService.InstanceTemplates.Get(project, instanceTemplate);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class InstancesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal InstancesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.InstancesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Instance GetInstance(string project, string zone, string instance, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.InstancesResource.GetRequest request = Client.InternalService.Instances.Get(project, zone, instance);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class GetSerialPortOutputOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.InstancesResource.GetSerialPortOutputRequest request)
+            {
+                if (Port.HasValue)
+                {
+                    request.Port = Port.Value;
+                }
+                if (Start.HasValue)
+                {
+                    request.Start = Start.Value;
+                }
+            }
+            public System.Nullable<int> Port { get; set; }
+            public System.Nullable<long> Start { get; set; }
+        }
+        public Google.Apis.Compute.v1.Data.SerialPortOutput GetSerialPortOutput(string project, string zone, string instance, GetSerialPortOutputOptions options = null)
+        {
+            Google.Apis.Compute.v1.InstancesResource.GetSerialPortOutputRequest request = Client.InternalService.Instances.GetSerialPortOutput(project, zone, instance);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class InterconnectAttachmentsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal InterconnectAttachmentsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.InterconnectAttachmentsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.InterconnectAttachment GetInterconnectAttachment(string project, string region, string interconnectAttachment, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.InterconnectAttachmentsResource.GetRequest request = Client.InternalService.InterconnectAttachments.Get(project, region, interconnectAttachment);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class InterconnectLocationsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal InterconnectLocationsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.InterconnectLocationsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.InterconnectLocation GetInterconnectLocation(string project, string interconnectLocation, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.InterconnectLocationsResource.GetRequest request = Client.InternalService.InterconnectLocations.Get(project, interconnectLocation);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class InterconnectsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal InterconnectsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.InterconnectsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Interconnect GetInterconnect(string project, string interconnect, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.InterconnectsResource.GetRequest request = Client.InternalService.Interconnects.Get(project, interconnect);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class LicenseCodesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal LicenseCodesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.LicenseCodesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.LicenseCode GetLicenseCode(string project, string licenseCode, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.LicenseCodesResource.GetRequest request = Client.InternalService.LicenseCodes.Get(project, licenseCode);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class TestIamPermissionsOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.LicenseCodesResource.TestIamPermissionsRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TestPermissionsResponse TestIamPermissions(Google.Apis.Compute.v1.Data.TestPermissionsRequest testPermissionsRequestEntity, string project, string resource, TestIamPermissionsOptions options = null)
+        {
+            Google.Apis.Compute.v1.LicenseCodesResource.TestIamPermissionsRequest request = Client.InternalService.LicenseCodes.TestIamPermissions(testPermissionsRequestEntity, project, resource);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class LicensesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal LicensesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.LicensesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.License GetLicense(string project, string license, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.LicensesResource.GetRequest request = Client.InternalService.Licenses.Get(project, license);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class TestIamPermissionsOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.LicensesResource.TestIamPermissionsRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TestPermissionsResponse TestIamPermissions(Google.Apis.Compute.v1.Data.TestPermissionsRequest testPermissionsRequestEntity, string project, string resource, TestIamPermissionsOptions options = null)
+        {
+            Google.Apis.Compute.v1.LicensesResource.TestIamPermissionsRequest request = Client.InternalService.Licenses.TestIamPermissions(testPermissionsRequestEntity, project, resource);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class MachineTypesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal MachineTypesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.MachineTypesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.MachineType GetMachineType(string project, string zone, string machineType, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.MachineTypesResource.GetRequest request = Client.InternalService.MachineTypes.Get(project, zone, machineType);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class NetworksClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal NetworksClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.NetworksResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Network GetNetwork(string project, string network, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.NetworksResource.GetRequest request = Client.InternalService.Networks.Get(project, network);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class ProjectsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal ProjectsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.ProjectsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Project GetProject(string project, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.ProjectsResource.GetRequest request = Client.InternalService.Projects.Get(project);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class GetXpnHostOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.ProjectsResource.GetXpnHostRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Project GetXpnHost(string project, GetXpnHostOptions options = null)
+        {
+            Google.Apis.Compute.v1.ProjectsResource.GetXpnHostRequest request = Client.InternalService.Projects.GetXpnHost(project);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionAutoscalersClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionAutoscalersClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionAutoscalersResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Autoscaler GetAutoscaler(string project, string region, string autoscaler, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionAutoscalersResource.GetRequest request = Client.InternalService.RegionAutoscalers.Get(project, region, autoscaler);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionBackendServicesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionBackendServicesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionBackendServicesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.BackendService GetBackendService(string project, string region, string backendService, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionBackendServicesResource.GetRequest request = Client.InternalService.RegionBackendServices.Get(project, region, backendService);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class GetHealthOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionBackendServicesResource.GetHealthRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.BackendServiceGroupHealth GetHealth(Google.Apis.Compute.v1.Data.ResourceGroupReference resourceGroupReferenceEntity, string project, string region, string backendService, GetHealthOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionBackendServicesResource.GetHealthRequest request = Client.InternalService.RegionBackendServices.GetHealth(resourceGroupReferenceEntity, project, region, backendService);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionCommitmentsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionCommitmentsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionCommitmentsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Commitment GetCommitment(string project, string region, string commitment, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionCommitmentsResource.GetRequest request = Client.InternalService.RegionCommitments.Get(project, region, commitment);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionDiskTypesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionDiskTypesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionDiskTypesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.DiskType GetDiskType(string project, string region, string diskType, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionDiskTypesResource.GetRequest request = Client.InternalService.RegionDiskTypes.Get(project, region, diskType);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionDisksClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionDisksClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionDisksResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Disk GetDisk(string project, string region, string disk, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionDisksResource.GetRequest request = Client.InternalService.RegionDisks.Get(project, region, disk);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class TestIamPermissionsOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionDisksResource.TestIamPermissionsRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TestPermissionsResponse TestIamPermissions(Google.Apis.Compute.v1.Data.TestPermissionsRequest testPermissionsRequestEntity, string project, string region, string resource, TestIamPermissionsOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionDisksResource.TestIamPermissionsRequest request = Client.InternalService.RegionDisks.TestIamPermissions(testPermissionsRequestEntity, project, region, resource);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionInstanceGroupManagersClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionInstanceGroupManagersClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionInstanceGroupManagersResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.InstanceGroupManager GetInstanceGroupManager(string project, string region, string instanceGroupManager, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionInstanceGroupManagersResource.GetRequest request = Client.InternalService.RegionInstanceGroupManagers.Get(project, region, instanceGroupManager);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionInstanceGroupsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionInstanceGroupsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionInstanceGroupsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.InstanceGroup GetInstanceGroup(string project, string region, string instanceGroup, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionInstanceGroupsResource.GetRequest request = Client.InternalService.RegionInstanceGroups.Get(project, region, instanceGroup);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionOperationsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionOperationsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class DeleteOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionOperationsResource.DeleteRequest request)
+            {
+
+            }
+        }
+        public string Delete(string project, string region, string operation, DeleteOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionOperationsResource.DeleteRequest request = Client.InternalService.RegionOperations.Delete(project, region, operation);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RegionsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RegionsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RegionsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Region GetRegion(string project, string region, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RegionsResource.GetRequest request = Client.InternalService.Regions.Get(project, region);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RoutersClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RoutersClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RoutersResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Router GetRouter(string project, string region, string router, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RoutersResource.GetRequest request = Client.InternalService.Routers.Get(project, region, router);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class GetRouterStatusOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RoutersResource.GetRouterStatusRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.RouterStatusResponse GetRouterStatus(string project, string region, string router, GetRouterStatusOptions options = null)
+        {
+            Google.Apis.Compute.v1.RoutersResource.GetRouterStatusRequest request = Client.InternalService.Routers.GetRouterStatus(project, region, router);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class PreviewOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RoutersResource.PreviewRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.RoutersPreviewResponse Preview(Google.Apis.Compute.v1.Data.Router routerEntity, string project, string region, string router, PreviewOptions options = null)
+        {
+            Google.Apis.Compute.v1.RoutersResource.PreviewRequest request = Client.InternalService.Routers.Preview(routerEntity, project, region, router);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class RoutesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal RoutesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.RoutesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Route GetRoute(string project, string route, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.RoutesResource.GetRequest request = Client.InternalService.Routes.Get(project, route);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class SnapshotsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal SnapshotsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.SnapshotsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Snapshot GetSnapshot(string project, string snapshot, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.SnapshotsResource.GetRequest request = Client.InternalService.Snapshots.Get(project, snapshot);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class SslCertificatesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal SslCertificatesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.SslCertificatesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.SslCertificate GetSslCertificate(string project, string sslCertificate, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.SslCertificatesResource.GetRequest request = Client.InternalService.SslCertificates.Get(project, sslCertificate);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class SslPoliciesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal SslPoliciesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.SslPoliciesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.SslPolicy GetSslPolicy(string project, string sslPolicy, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.SslPoliciesResource.GetRequest request = Client.InternalService.SslPolicies.Get(project, sslPolicy);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class SubnetworksClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal SubnetworksClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.SubnetworksResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Subnetwork GetSubnetwork(string project, string region, string subnetwork, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.SubnetworksResource.GetRequest request = Client.InternalService.Subnetworks.Get(project, region, subnetwork);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class TargetHttpProxiesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal TargetHttpProxiesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.TargetHttpProxiesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TargetHttpProxy GetTargetHttpProxy(string project, string targetHttpProxy, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.TargetHttpProxiesResource.GetRequest request = Client.InternalService.TargetHttpProxies.Get(project, targetHttpProxy);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class TargetHttpsProxiesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal TargetHttpsProxiesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.TargetHttpsProxiesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TargetHttpsProxy GetTargetHttpsProxy(string project, string targetHttpsProxy, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.TargetHttpsProxiesResource.GetRequest request = Client.InternalService.TargetHttpsProxies.Get(project, targetHttpsProxy);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class TargetInstancesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal TargetInstancesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.TargetInstancesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TargetInstance GetTargetInstance(string project, string zone, string targetInstance, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.TargetInstancesResource.GetRequest request = Client.InternalService.TargetInstances.Get(project, zone, targetInstance);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class TargetPoolsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal TargetPoolsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.TargetPoolsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TargetPool GetTargetPool(string project, string region, string targetPool, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.TargetPoolsResource.GetRequest request = Client.InternalService.TargetPools.Get(project, region, targetPool);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class GetHealthOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.TargetPoolsResource.GetHealthRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TargetPoolInstanceHealth GetHealth(Google.Apis.Compute.v1.Data.InstanceReference instanceReferenceEntity, string project, string region, string targetPool, GetHealthOptions options = null)
+        {
+            Google.Apis.Compute.v1.TargetPoolsResource.GetHealthRequest request = Client.InternalService.TargetPools.GetHealth(instanceReferenceEntity, project, region, targetPool);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class TargetSslProxiesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal TargetSslProxiesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.TargetSslProxiesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TargetSslProxy GetTargetSslProxy(string project, string targetSslProxy, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.TargetSslProxiesResource.GetRequest request = Client.InternalService.TargetSslProxies.Get(project, targetSslProxy);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class TargetTcpProxiesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal TargetTcpProxiesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.TargetTcpProxiesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TargetTcpProxy GetTargetTcpProxy(string project, string targetTcpProxy, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.TargetTcpProxiesResource.GetRequest request = Client.InternalService.TargetTcpProxies.Get(project, targetTcpProxy);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class TargetVpnGatewaysClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal TargetVpnGatewaysClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.TargetVpnGatewaysResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.TargetVpnGateway GetTargetVpnGateway(string project, string region, string targetVpnGateway, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.TargetVpnGatewaysResource.GetRequest request = Client.InternalService.TargetVpnGateways.Get(project, region, targetVpnGateway);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class UrlMapsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal UrlMapsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.UrlMapsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.UrlMap GetUrlMap(string project, string urlMap, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.UrlMapsResource.GetRequest request = Client.InternalService.UrlMaps.Get(project, urlMap);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+        public class ValidateOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.UrlMapsResource.ValidateRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.UrlMapsValidateResponse Validate(Google.Apis.Compute.v1.Data.UrlMapsValidateRequest urlMapsValidateRequestEntity, string project, string urlMap, ValidateOptions options = null)
+        {
+            Google.Apis.Compute.v1.UrlMapsResource.ValidateRequest request = Client.InternalService.UrlMaps.Validate(urlMapsValidateRequestEntity, project, urlMap);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class VpnTunnelsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal VpnTunnelsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.VpnTunnelsResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.VpnTunnel GetVpnTunnel(string project, string region, string vpnTunnel, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.VpnTunnelsResource.GetRequest request = Client.InternalService.VpnTunnels.Get(project, region, vpnTunnel);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class ZoneOperationsClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal ZoneOperationsClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class DeleteOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.ZoneOperationsResource.DeleteRequest request)
+            {
+
+            }
+        }
+        public string Delete(string project, string zone, string operation, DeleteOptions options = null)
+        {
+            Google.Apis.Compute.v1.ZoneOperationsResource.DeleteRequest request = Client.InternalService.ZoneOperations.Delete(project, zone, operation);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+    public class ZonesClient
+    {
+
+        public Google.Cloud.Compute.Prototype.ComputeClient Client { get; private set; }
+
+        internal ZonesClient(Google.Cloud.Compute.Prototype.ComputeClient client)
+        {
+            Client = client;
+        }
+        public class GetOptions
+        {
+            internal void ModifyRequest(Google.Apis.Compute.v1.ZonesResource.GetRequest request)
+            {
+
+            }
+        }
+        public Google.Apis.Compute.v1.Data.Zone GetZone(string project, string zone, GetOptions options = null)
+        {
+            Google.Apis.Compute.v1.ZonesResource.GetRequest request = Client.InternalService.Zones.Get(project, zone);
+            options?.ModifyRequest(request);
+            return request.Execute();
+        }
+    }
+}
