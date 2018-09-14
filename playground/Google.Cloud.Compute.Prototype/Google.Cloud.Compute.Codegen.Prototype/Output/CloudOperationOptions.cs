@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
@@ -37,9 +38,7 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
 
         private ClassDeclarationSyntax InitSyntaxNode()
         {
-            var syntaxNode = CSharpSyntaxTree
-                .ParseText(Templates.GetOptionsTemplate(_inputOperation.OperationName, _inputOperation.AssociatedRequest.FullyQualifiedName))
-                .GetRoot().ChildNodes().Single() as ClassDeclarationSyntax;
+            var syntaxNode = GetOptionsClass();
 
             foreach (ApiaryRequestParameter queryParam in _inputOperation.AssociatedRequest.OptionalParameters)
             {
@@ -54,6 +53,29 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
             }
 
             return syntaxNode;
+        }
+
+        private ClassDeclarationSyntax GetOptionsClass()
+        {
+            ClassDeclarationSyntax optionsClass =
+                ClassDeclaration($"{_inputOperation.OperationName}Options")
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PublicKeyword)))
+                .WithMembers(SingletonList<MemberDeclarationSyntax>(
+                    MethodDeclaration(
+                        PredefinedType(
+                            Token(SyntaxKind.VoidKeyword)),
+                        Identifier("ModifyRequest"))
+                    .WithModifiers(TokenList(
+                        Token(SyntaxKind.InternalKeyword)))
+                    .WithParameterList(ParameterList(SingletonSeparatedList(
+                        Parameter(
+                            Identifier(CodegenConfig.Current.CloudOptionsModifyRequestParamName))
+                        .WithType(
+                            IdentifierName(_inputOperation.AssociatedRequest.FullyQualifiedName)))))
+                    .WithBody(
+                        Block())));
+            return optionsClass;
         }
     }
 }

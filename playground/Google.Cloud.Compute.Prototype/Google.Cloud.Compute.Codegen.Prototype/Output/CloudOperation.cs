@@ -13,11 +13,14 @@
 // limitations under the License.
 
 using Google.Cloud.Compute.Codegen.Prototype.Input;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
@@ -38,35 +41,96 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
 
         private MethodDeclarationSyntax InitSyntaxNode()
         {
-            var returnTypeName = _inputOperation.AssociatedRequest.RequestReturnTypeName;
-            var apiaryOperationName = _inputOperation.OperationName;
-            var cloudOperationName = _inputOperation.OperationName.Equals("Get")?
+            string returnTypeName = _inputOperation.AssociatedRequest.RequestReturnTypeName;
+            string apiaryOperationName = _inputOperation.OperationName;
+            string cloudOperationName = apiaryOperationName.Equals("Get") ?
                 GenerateGetOperationName(returnTypeName):
                 _inputOperation.OperationName;
+            string optionsParameterTypeName = _options.ClassName;
+            string requestTypeName = _inputOperation.AssociatedRequest.FullyQualifiedName;
+            string apiaryResourcePropertyName = _inputOperation.ParentResource.PluralResourceName;
 
-            var sortedRequiredParameters =
-                (from reqParam in _inputOperation.SortedRequiredParameters
-                 select new Tuple<string, string>(reqParam.TypeName, reqParam.NameInService)).ToArray();
+            List<SyntaxNodeOrToken> parameters = new List<SyntaxNodeOrToken>();
+            List<SyntaxNodeOrToken> arguments = new List<SyntaxNodeOrToken>();
 
-            // The body parameter can be null
-            var bodyParameterTypeName = _inputOperation.AssociatedRequest.BodyParameter?.TypeName;
-            // The name on apiary is Body, so we build a better one based on the type.
-            var bodyParameterName = GenerateBodyParameterName(bodyParameterTypeName);
+            if (_inputOperation.AssociatedRequest.BodyParameter != null)
+            {
+                string bodyParameterTypeName = _inputOperation.AssociatedRequest.BodyParameter.TypeName;
+                string bodyParameterName = GenerateBodyParameterName(bodyParameterTypeName);
+                AddParameter(parameters, bodyParameterName, bodyParameterTypeName);
+                AddArgument(arguments, bodyParameterName);
+            }
 
-            var optionsParameterType = _options.ClassName;
-            var associatedRequestTypeName = _inputOperation.AssociatedRequest.FullyQualifiedName;
-            var apiaryParentResourcePropertyName = _inputOperation.ParentResource.PluralResourceName;
+            foreach (ApiaryRequestParameter reqParam in _inputOperation.SortedRequiredParameters)
+            {
+                AddParameter(parameters, reqParam.NameInService, reqParam.TypeName);
+                AddArgument(arguments, reqParam.NameInService);
+            }
 
-            var syntaxNode = CSharpSyntaxTree
-                .ParseText(Templates.GetStandardOperationTemplate(
-                    returnTypeName, cloudOperationName, apiaryOperationName,
-                    sortedRequiredParameters,
-                    bodyParameterName, bodyParameterTypeName,
-                    optionsParameterType,
-                    associatedRequestTypeName, apiaryParentResourcePropertyName))
-                .GetRoot().ChildNodes().Single() as MethodDeclarationSyntax;
+            // Remove the last comma from arguments,
+            // no need to do so for receiving because the options parameter is always there.
+            if (arguments.Count > 0)
+            {
+                arguments.RemoveAt(arguments.Count - 1);
+            }
 
-            return syntaxNode;
+            parameters.Add(
+                Parameter(
+                    Identifier("options"))
+                .WithType(
+                    IdentifierName(optionsParameterTypeName))
+                .WithDefault(
+                    EqualsValueClause(
+                        LiteralExpression(SyntaxKind.NullLiteralExpression))));
+
+            MethodDeclarationSyntax method =
+                MethodDeclaration(
+                    IdentifierName(returnTypeName),
+                    Identifier(cloudOperationName))
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PublicKeyword)))
+                .WithParameterList(ParameterList(SeparatedList<ParameterSyntax>(
+                    parameters)))
+                .WithBody(
+                    Block(
+                        LocalDeclarationStatement(
+                            VariableDeclaration(
+                                IdentifierName(requestTypeName))
+                            .WithVariables(SingletonSeparatedList(
+                                VariableDeclarator(
+                                    Identifier("request"))
+                                .WithInitializer(
+                                    EqualsValueClause(
+                                        InvocationExpression(
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    MemberAccessExpression(
+                                                        SyntaxKind.SimpleMemberAccessExpression,
+                                                        IdentifierName("Client"),
+                                                        IdentifierName("InternalService")),
+                                                    IdentifierName(apiaryResourcePropertyName)),
+                                                IdentifierName(apiaryOperationName)))
+                                        .WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(
+                                                arguments)))))))),
+                        ExpressionStatement(
+                            ConditionalAccessExpression(
+                                IdentifierName("options"),
+                                InvocationExpression(
+                                    MemberBindingExpression(
+                                        IdentifierName("ModifyRequest")))
+                                .WithArgumentList(ArgumentList(SingletonSeparatedList(
+                                    Argument(
+                                        IdentifierName("request"))))))),
+                        ReturnStatement(
+                            InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName("request"),
+                                    IdentifierName("Execute"))))));
+
+            return method;
         }
 
         private static string GenerateGetOperationName(string getOperationReturnTypeName)
@@ -96,6 +160,26 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
         private static string GetClassNameOnly(string typeName)
         {
             return typeName.Split('.').Last();
+        }
+
+        private static void AddParameter(List<SyntaxNodeOrToken> parameters, string paramName, string paramTypeName)
+        {
+            parameters.Add(
+                Parameter(
+                    Identifier(paramName))
+                .WithType(
+                    IdentifierName(paramTypeName)));
+            parameters.Add(
+                Token(SyntaxKind.CommaToken));
+        }
+
+        private static void AddArgument(List<SyntaxNodeOrToken> arguments, string argName)
+        {
+            arguments.Add(
+                Argument(
+                    IdentifierName(argName)));
+            arguments.Add(
+                Token(SyntaxKind.CommaToken));
         }
     }
 }

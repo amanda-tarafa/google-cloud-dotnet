@@ -16,7 +16,7 @@ using Google.Cloud.Compute.Codegen.Prototype.Input;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
@@ -36,9 +36,7 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
 
         private ClassDeclarationSyntax InitSyntaxNode()
         {
-            var syntaxNode = CSharpSyntaxTree
-                        .ParseText(Templates.GetResourceClassTemplate(_inputResource.PluralResourceName))
-                        .GetRoot().ChildNodes().Single() as ClassDeclarationSyntax;
+            ClassDeclarationSyntax syntaxNode = GetResourceClassDeclaration();
 
             foreach (ApiaryOperation inputMethod in _inputResource.StandardOperations)
             {
@@ -48,6 +46,47 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
             }
 
             return syntaxNode;
+        }
+
+        private ClassDeclarationSyntax GetResourceClassDeclaration()
+        {
+            string resourceClassName = $"{_inputResource.PluralResourceName}Client";
+            string fullyQualifiedClientClassName = $"{CodegenConfig.Current.CloudClientNamespace}.{CodegenConfig.Current.CloudClientClassName}";
+            ClassDeclarationSyntax classDeclaration =
+                ClassDeclaration(resourceClassName)
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PublicKeyword)))
+                .WithMembers(List(new MemberDeclarationSyntax[] {
+                    PropertyDeclaration(
+                        IdentifierName(fullyQualifiedClientClassName),
+                        Identifier("Client"))
+                    .WithModifiers(TokenList(
+                        Token(SyntaxKind.PublicKeyword)))
+                    .WithAccessorList(AccessorList(List(new AccessorDeclarationSyntax[]{
+                        AccessorDeclaration(
+                            SyntaxKind.GetAccessorDeclaration)
+                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
+                        AccessorDeclaration(
+                            SyntaxKind.SetAccessorDeclaration)
+                        .WithModifiers(TokenList(
+                            Token(SyntaxKind.PrivateKeyword)))
+                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))}))),
+                    ConstructorDeclaration(
+                        Identifier(resourceClassName))
+                    .WithModifiers(TokenList(
+                        Token(SyntaxKind.InternalKeyword)))
+                    .WithParameterList(ParameterList(SingletonSeparatedList<ParameterSyntax>(
+                        Parameter(
+                            Identifier("client"))
+                        .WithType(
+                            IdentifierName(fullyQualifiedClientClassName)))))
+                    .WithBody(Block(SingletonList<StatementSyntax>(
+                        ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                IdentifierName("Client"),
+                                IdentifierName("client"))))))}));
+            return classDeclaration;
         }
     }
 }

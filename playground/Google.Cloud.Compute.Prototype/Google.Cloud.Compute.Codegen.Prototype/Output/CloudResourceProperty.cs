@@ -16,27 +16,61 @@ using Google.Cloud.Compute.Codegen.Prototype.Input;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
     internal class CloudResourceProperty
     {
+        private readonly string _fullyQualifiedResourceClassName;
         private readonly CloudResource _resource;
         private readonly ApiaryResource _inputResource;
         internal CloudResourceProperty(ApiaryResource inputResource, CloudResource outputResource)
         {
             _inputResource = inputResource ?? throw new ArgumentNullException(nameof(inputResource));
             _resource = outputResource ?? throw new ArgumentNullException(nameof(outputResource));
+            _fullyQualifiedResourceClassName = $"{CodegenConfig.Current.CloudResourcesNamespace}.{_resource.ClassName}";
         }
 
         public PropertyDeclarationSyntax PropertySyntaxNode =>
-            CSharpSyntaxTree
-            .ParseText(Templates.GetResourcePropertyTemplate(_resource.ClassName, _inputResource.PluralResourceName))
-            .GetRoot().ChildNodes().Single() as PropertyDeclarationSyntax;
+            GetResourcePropertyDeclaration();
 
         public StatementSyntax PropertyInitSyntaxNode =>
-            SyntaxFactory
-            .ParseStatement(Templates.GetResourcePropertyInitializeTemplate(_resource.ClassName, _inputResource.PluralResourceName));
+            GetResourcePropertyInitializeStatement();
+
+        private PropertyDeclarationSyntax GetResourcePropertyDeclaration()
+        {
+            PropertyDeclarationSyntax property =
+                PropertyDeclaration(
+                    IdentifierName(_fullyQualifiedResourceClassName),
+                    Identifier(_inputResource.PluralResourceName))
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PublicKeyword)))
+                .WithAccessorList(AccessorList(List(new AccessorDeclarationSyntax[]{
+                    AccessorDeclaration(
+                        SyntaxKind.GetAccessorDeclaration)
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
+                    AccessorDeclaration(
+                        SyntaxKind.SetAccessorDeclaration)
+                    .WithModifiers(TokenList(
+                        Token(SyntaxKind.PrivateKeyword)))
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))})));
+            return property;
+        }
+
+        private StatementSyntax GetResourcePropertyInitializeStatement()
+        {
+            ExpressionStatementSyntax statement =
+                ExpressionStatement(
+                    AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                            IdentifierName(_inputResource.PluralResourceName),
+                            ObjectCreationExpression(
+                                IdentifierName(_fullyQualifiedResourceClassName))
+                            .WithArgumentList(ArgumentList(SingletonSeparatedList(
+                                Argument(
+                                    ThisExpression()))))));
+            return statement;
+        }
     }
 }

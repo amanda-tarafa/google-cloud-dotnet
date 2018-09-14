@@ -16,7 +16,7 @@ using Google.Cloud.Compute.Codegen.Prototype.Input;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
@@ -29,21 +29,55 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
             _inputParameter = inputParameter ?? throw new ArgumentNullException(nameof(inputParameter));
         }
 
-        public PropertyDeclarationSyntax PropertySyntaxNode => 
-            CSharpSyntaxTree
-            .ParseText(Templates.GetOptionsPropertyTemplate(_inputParameter.NameInRequest, _inputParameter.TypeName))
-            .GetRoot().ChildNodes().Single() as PropertyDeclarationSyntax;
+        public PropertyDeclarationSyntax PropertySyntaxNode =>
+            GetPropertyDeclaration();
 
         public StatementSyntax PropertyModifyRequestSyntax
-        {
-            get
-            {
-                string template = _inputParameter.IsNullable ?
-                    Templates.GetOptionsNullablePropertyModifyRequestTemplate(_inputParameter.NameInRequest) :
-                    Templates.GetOptionsPropertyModifyRequestTemplate(_inputParameter.NameInRequest);
+            => GetModifyPropertyStatement();
 
-                return SyntaxFactory.ParseStatement(template);
-            }
+        private PropertyDeclarationSyntax GetPropertyDeclaration()
+        {
+            PropertyDeclarationSyntax property =
+                PropertyDeclaration(
+                    IdentifierName(_inputParameter.TypeName),
+                    Identifier(_inputParameter.NameInRequest))
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PublicKeyword)))
+                .WithAccessorList(AccessorList(List(new AccessorDeclarationSyntax[]{
+                    AccessorDeclaration(
+                        SyntaxKind.GetAccessorDeclaration)
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
+                    AccessorDeclaration(
+                        SyntaxKind.SetAccessorDeclaration)
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))})));
+            return property;
+        }
+
+        private StatementSyntax GetModifyPropertyStatement()
+        {
+            ExpressionSyntax condition = _inputParameter.IsNullable ?
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    IdentifierName(_inputParameter.NameInRequest),
+                    IdentifierName("HasValue")) as ExpressionSyntax:
+                BinaryExpression(
+                    SyntaxKind.NotEqualsExpression,
+                    IdentifierName(_inputParameter.NameInRequest),
+                    LiteralExpression(SyntaxKind.NullLiteralExpression));
+
+            IfStatementSyntax statement =
+                IfStatement(
+                    condition,
+                    Block(SingletonList<StatementSyntax>(
+                        ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName(CodegenConfig.Current.CloudOptionsModifyRequestParamName),
+                                        IdentifierName(_inputParameter.NameInRequest)),
+                                    IdentifierName(_inputParameter.NameInRequest))))));
+            return statement;
         }
     }
 }

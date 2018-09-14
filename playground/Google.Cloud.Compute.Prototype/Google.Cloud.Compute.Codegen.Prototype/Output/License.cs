@@ -12,19 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System.Linq;
 
-namespace Google.Cloud.Compute.Prototype
+namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
-    class Program
+    public static class License
     {
-        static void Main(string[] args)
+        public static SyntaxTriviaList TriviaList
         {
-            //TestProgram.Comparison.APIsComparisons.Run();
-            //TestProgram.Extensions.ComputeApiaryExtension.Run();
-            //TestProgram.Wrapping.WrappingApiary.Run();
-            TestProgram.Generated.GeneratedCompute.Run();
-            Console.ReadKey();
+            get
+            {
+                var parsedLicense = CSharpSyntaxTree.ParseText(CodegenConfig.Current.License).GetRoot();
+                return parsedLicense.ChildTokens().ElementAt(0).LeadingTrivia;
+            }
         }
+        
     }
 }

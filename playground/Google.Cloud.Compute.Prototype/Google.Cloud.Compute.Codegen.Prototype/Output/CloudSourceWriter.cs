@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using System.Linq;
 using System.Threading.Tasks;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
@@ -28,8 +29,8 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
 
         internal CloudSourceWriter()
         {
-            _resources = CSharpSyntaxTree.ParseText(Templates.ResourcesFileTemplate).GetRoot();
-            _client = CSharpSyntaxTree.ParseText(Templates.ClientFileTemplate).GetRoot();
+            _resources = GetResourcesCompilationUnit();
+            _client = GetClientcompilationUnit();
         }
 
         public void AddResource(ClassDeclarationSyntax resource)
@@ -56,7 +57,7 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
             var newClientClass = oldClientClass.AddMembers(property);
 
             var oldInitializeMethod = (from method in newClientClass.Members.OfType<MethodDeclarationSyntax>()
-                                       where method.Identifier.ValueText == Templates.ClientInitResourcesMethodName
+                                       where method.Identifier.ValueText == CodegenConfig.Current.CloudClientInitResourcesMethodName
                                        select method).Single();
 
             var newInitializeMethod = oldInitializeMethod.AddBodyStatements(propertyInit);
@@ -71,26 +72,62 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
         {
             var workspace = MSBuildWorkspace.Create();
             var solutionTask = workspace.OpenSolutionAsync(
-                CodegenConfig.Current.OutputSolutionFilePath);
+                CodegenConfig.Current.CloudSolutionFilePath);
 
             _resources = _resources.Format(workspace);
             _client = _client.Format(workspace);
 
             var solution = await solutionTask;
-            var project = solution.GetProject(CodegenConfig.Current.OutputProjectName);
+            var project = solution.GetProject(CodegenConfig.Current.CloudProjectName);
 
             var resourcesDocument = project.CreateOrReplaceDocument(
-                CodegenConfig.Current.OutputResourcesFileName, _resources);
+                CodegenConfig.Current.CloudResourcesFileName, _resources);
 
             // Update our local project reference because the whole structure is inmutable.
             project = resourcesDocument.Project;
 
             var clientDocument = project.CreateOrReplaceDocument(
-                CodegenConfig.Current.OutputClientFileName, _client);
+                CodegenConfig.Current.CloudClientFileName, _client);
             // Update our local project reference because the whole structure is inmutable.
             project = clientDocument.Project;
 
             workspace.TryApplyChanges(project.Solution);
+        }
+
+        private CompilationUnitSyntax GetResourcesCompilationUnit()
+        {
+            CompilationUnitSyntax resources =
+                CompilationUnit()
+                .WithMembers(SingletonList<MemberDeclarationSyntax>(
+                        NamespaceDeclaration(
+                            IdentifierName(CodegenConfig.Current.CloudResourcesNamespace))
+                        .WithLeadingTrivia(License.TriviaList)));
+                        
+            return resources;
+        }
+
+        private CompilationUnitSyntax GetClientcompilationUnit()
+        {
+            CompilationUnitSyntax client =
+                CompilationUnit()
+                .WithMembers(SingletonList<MemberDeclarationSyntax>(
+                        NamespaceDeclaration(
+                            IdentifierName(CodegenConfig.Current.CloudClientNamespace))
+                        .WithLeadingTrivia(License.TriviaList)
+                        .WithMembers(SingletonList<MemberDeclarationSyntax>(
+                            ClassDeclaration(CodegenConfig.Current.CloudClientClassName)
+                            .WithModifiers(TokenList(
+                                Token(SyntaxKind.PublicKeyword),
+                                Token(SyntaxKind.PartialKeyword)))
+                            .WithMembers(SingletonList<MemberDeclarationSyntax>(
+                                MethodDeclaration(
+                                    PredefinedType(Token(SyntaxKind.VoidKeyword)),
+                                    CodegenConfig.Current.CloudClientInitResourcesMethodName)
+                                .WithModifiers(TokenList(
+                                    Token(SyntaxKind.PartialKeyword)))
+                                .WithBody(Block())))))));
+
+            return client;
         }
     }
 }

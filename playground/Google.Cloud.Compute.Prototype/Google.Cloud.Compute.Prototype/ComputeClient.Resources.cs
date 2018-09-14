@@ -72,8 +72,8 @@ namespace Google.Cloud.Compute.Prototype
             VpnTunnels = new Google.Cloud.Compute.Prototype.VpnTunnelsClient(this);
             ZoneOperations = new Google.Cloud.Compute.Prototype.ZoneOperationsClient(this);
             Zones = new Google.Cloud.Compute.Prototype.ZonesClient(this);
-
         }
+
         public Google.Cloud.Compute.Prototype.AcceleratorTypesClient AcceleratorTypes { get; private set; }
         public Google.Cloud.Compute.Prototype.AddressesClient Addresses { get; private set; }
         public Google.Cloud.Compute.Prototype.AutoscalersClient Autoscalers { get; private set; }
