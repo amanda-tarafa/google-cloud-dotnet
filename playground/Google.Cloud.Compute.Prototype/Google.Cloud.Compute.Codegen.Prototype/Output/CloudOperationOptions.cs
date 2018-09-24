@@ -17,65 +17,60 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Linq;
+using static Google.Cloud.Compute.Codegen.Prototype.RoslynSyntaxFactory;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
     internal class CloudOperationOptions
     {
+        private const string ModifyRequestMethodName = "ModifyRequest";
+
         private readonly ApiaryOperation _inputOperation;
-        private readonly Lazy<ClassDeclarationSyntax> _syntaxNode;
+        private readonly Lazy<ClassDeclarationSyntax> _optionsClass;
         internal CloudOperationOptions(ApiaryOperation inputOperation)
         {
             _inputOperation = inputOperation ?? throw new ArgumentNullException(nameof(inputOperation));
-            _syntaxNode = new Lazy<ClassDeclarationSyntax>(InitSyntaxNode);
+            _optionsClass = new Lazy<ClassDeclarationSyntax>(InitOptionsClass);
         }
 
-        public string ClassName => _syntaxNode.Value.Identifier.ValueText;
+        public string ClassName => OptionsClass.GetName();
 
-        public ClassDeclarationSyntax SyntaxNode => _syntaxNode.Value;
+        public ClassDeclarationSyntax OptionsClass => _optionsClass.Value;
 
-        private ClassDeclarationSyntax InitSyntaxNode()
+        private ClassDeclarationSyntax InitOptionsClass()
         {
-            var syntaxNode = GetOptionsClass();
+            var optionsClass = BuildOptionsClassShell();
 
             foreach (ApiaryRequestParameter queryParam in _inputOperation.AssociatedRequest.OptionalParameters)
             {
-                var property = new CloudOperationOptionsProperty(queryParam);
+                var property = new CloudOperationOptionalParam(queryParam);
 
-                var oldModifyRequestNode = (from method in syntaxNode.Members.OfType<MethodDeclarationSyntax>()
-                                            select method).Single();
-                var newModifyRequestNode = oldModifyRequestNode.AddBodyStatements(property.PropertyModifyRequestSyntax);
-                syntaxNode = syntaxNode.ReplaceNode(oldModifyRequestNode, newModifyRequestNode);
+                var oldModifyRequestNode = optionsClass.FindMethod(ModifyRequestMethodName);
+                var newModifyRequestNode = oldModifyRequestNode.AddBodyStatements(property.OptionsModifyRequestStatement);
+                optionsClass = optionsClass.ReplaceNode(oldModifyRequestNode, newModifyRequestNode);
 
-                syntaxNode = syntaxNode.AddMembers(property.PropertySyntaxNode);
+                optionsClass = optionsClass.AddMembers(property.OptionsOptionalParamProperty);
             }
 
-            return syntaxNode;
+            return optionsClass;
         }
 
-        private ClassDeclarationSyntax GetOptionsClass()
+        private ClassDeclarationSyntax BuildOptionsClassShell()
         {
-            ClassDeclarationSyntax optionsClass =
-                ClassDeclaration($"{_inputOperation.OperationName}Options")
-                .WithModifiers(TokenList(
-                    Token(SyntaxKind.PublicKeyword)))
-                .WithMembers(SingletonList<MemberDeclarationSyntax>(
-                    MethodDeclaration(
-                        PredefinedType(
-                            Token(SyntaxKind.VoidKeyword)),
-                        Identifier("ModifyRequest"))
-                    .WithModifiers(TokenList(
-                        Token(SyntaxKind.InternalKeyword)))
-                    .WithParameterList(ParameterList(SingletonSeparatedList(
-                        Parameter(
-                            Identifier(CodegenConfig.Current.CloudOptionsModifyRequestParamName))
-                        .WithType(
-                            IdentifierName(_inputOperation.AssociatedRequest.FullyQualifiedName)))))
-                    .WithBody(
-                        Block())));
-            return optionsClass;
+            var modifyRequestMethod =
+                VoidMethodDeclaration(ModifyRequestMethodName, SyntaxKind.InternalKeyword)
+                .AddParameters(
+                    (typeName: _inputOperation.AssociatedRequest.FullyQualifiedName,
+                    identifier: CodegenConfig.Current.CloudOptionsModifyRequestParamName))
+                .WithEmptyBody();
+
+            var optionsClassNameBase = _inputOperation.OperationName.Equals("Get") ?
+                Utils.GenerateGetOperationName(_inputOperation.AssociatedRequest.RequestReturnTypeName) :
+                _inputOperation.OperationName;
+
+            return ClassDeclaration($"{optionsClassNameBase}Options", SyntaxKind.PublicKeyword)
+                .AddMembers(modifyRequestMethod);
         }
     }
 }

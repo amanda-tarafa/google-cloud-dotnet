@@ -26,6 +26,6 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Input
             _propertyNode = propertyNode ?? throw new ArgumentNullException(nameof(propertyNode));
         }
 
-        public string TypeName => _propertyNode.Type.ToString();
+        public string TypeName => _propertyNode.Type.GetName();
     }
 }

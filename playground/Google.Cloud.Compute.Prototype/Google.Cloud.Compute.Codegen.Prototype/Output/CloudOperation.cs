@@ -13,13 +13,12 @@
 // limitations under the License.
 
 using Google.Cloud.Compute.Codegen.Prototype.Input;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using static Google.Cloud.Compute.Codegen.Prototype.RoslynSyntaxFactory;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
@@ -28,158 +27,92 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
     {
         private readonly ApiaryOperation _inputOperation;
         private readonly CloudOperationOptions _options;
-        private readonly Lazy<MethodDeclarationSyntax> _syntaxNode;
+        private readonly Lazy<MethodDeclarationSyntax> _method;
 
         internal CloudOperation(ApiaryOperation inputOperation, CloudOperationOptions options)
         {
             _inputOperation = inputOperation ?? throw new ArgumentNullException(nameof(inputOperation));
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _syntaxNode = new Lazy<MethodDeclarationSyntax>(InitSyntaxNode);
+            _method = new Lazy<MethodDeclarationSyntax>(InitiMethodDeclaration);
         }
 
-        public MethodDeclarationSyntax SyntaxNode => _syntaxNode.Value;
+        public MethodDeclarationSyntax MethodDeclaration => _method.Value;
 
-        private MethodDeclarationSyntax InitSyntaxNode()
+        private MethodDeclarationSyntax InitiMethodDeclaration()
         {
             string returnTypeName = _inputOperation.AssociatedRequest.RequestReturnTypeName;
             string apiaryOperationName = _inputOperation.OperationName;
             string cloudOperationName = apiaryOperationName.Equals("Get") ?
-                GenerateGetOperationName(returnTypeName):
+                Utils.GenerateGetOperationName(returnTypeName):
                 _inputOperation.OperationName;
-            string optionsParameterTypeName = _options.ClassName;
-            string requestTypeName = _inputOperation.AssociatedRequest.FullyQualifiedName;
-            string apiaryResourcePropertyName = _inputOperation.ParentResource.PluralResourceName;
 
-            List<SyntaxNodeOrToken> parameters = new List<SyntaxNodeOrToken>();
-            List<SyntaxNodeOrToken> arguments = new List<SyntaxNodeOrToken>();
+            List<(string typeName, string identifier)> parameters = new List<(string typeName, string identifier)>();
+            List<string> arguments = new List<string>();
 
+            // If there is one, add body as parameter and argument.
             if (_inputOperation.AssociatedRequest.BodyParameter != null)
             {
                 string bodyParameterTypeName = _inputOperation.AssociatedRequest.BodyParameter.TypeName;
-                string bodyParameterName = GenerateBodyParameterName(bodyParameterTypeName);
-                AddParameter(parameters, bodyParameterName, bodyParameterTypeName);
-                AddArgument(arguments, bodyParameterName);
+                string bodyParameterName = Utils.GenerateBodyParameterName(bodyParameterTypeName);
+                parameters.Add((typeName: bodyParameterTypeName, identifier: bodyParameterName));
+                arguments.Add(bodyParameterName);
             }
 
+            // Then add all the requiered parameters/arguments.
             foreach (ApiaryRequestParameter reqParam in _inputOperation.SortedRequiredParameters)
             {
-                AddParameter(parameters, reqParam.NameInService, reqParam.TypeName);
-                AddArgument(arguments, reqParam.NameInService);
+                parameters.Add((typeName: reqParam.TypeName, identifier: reqParam.NameInService));
+                arguments.Add(reqParam.NameInService);
             }
 
-            // Remove the last comma from arguments,
-            // no need to do so for receiving because the options parameter is always there.
-            if (arguments.Count > 0)
-            {
-                arguments.RemoveAt(arguments.Count - 1);
-            }
+            // Creating the options parameter on it's own because of the default value.
+            var optionsParameter =
+                Parameters((typeName: _options.ClassName, identifier: "options")).First()
+                .WithDefault(EqualsValueClause(LiteralExpression(SyntaxKind.NullLiteralExpression)));
 
-            parameters.Add(
-                Parameter(
-                    Identifier("options"))
-                .WithType(
-                    IdentifierName(optionsParameterTypeName))
-                .WithDefault(
-                    EqualsValueClause(
-                        LiteralExpression(SyntaxKind.NullLiteralExpression))));
-
-            MethodDeclarationSyntax method =
+            // Operation method declaration. No method body at this point.
+            var method =
                 MethodDeclaration(
-                    IdentifierName(returnTypeName),
-                    Identifier(cloudOperationName))
-                .WithModifiers(TokenList(
-                    Token(SyntaxKind.PublicKeyword)))
-                .WithParameterList(ParameterList(SeparatedList<ParameterSyntax>(
-                    parameters)))
-                .WithBody(
-                    Block(
-                        LocalDeclarationStatement(
-                            VariableDeclaration(
-                                IdentifierName(requestTypeName))
-                            .WithVariables(SingletonSeparatedList(
-                                VariableDeclarator(
-                                    Identifier("request"))
-                                .WithInitializer(
-                                    EqualsValueClause(
-                                        InvocationExpression(
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                MemberAccessExpression(
-                                                    SyntaxKind.SimpleMemberAccessExpression,
-                                                    MemberAccessExpression(
-                                                        SyntaxKind.SimpleMemberAccessExpression,
-                                                        IdentifierName("Client"),
-                                                        IdentifierName("InternalService")),
-                                                    IdentifierName(apiaryResourcePropertyName)),
-                                                IdentifierName(apiaryOperationName)))
-                                        .WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(
-                                                arguments)))))))),
-                        ExpressionStatement(
-                            ConditionalAccessExpression(
-                                IdentifierName("options"),
-                                InvocationExpression(
-                                    MemberBindingExpression(
-                                        IdentifierName("ModifyRequest")))
-                                .WithArgumentList(ArgumentList(SingletonSeparatedList(
-                                    Argument(
-                                        IdentifierName("request"))))))),
-                        ReturnStatement(
-                            InvocationExpression(
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName("request"),
-                                    IdentifierName("Execute"))))));
+                    returnTypeName,
+                    cloudOperationName,
+                    SyntaxKind.PublicKeyword)
+                .AddParameters(parameters.ToArray())
+                .AddParameterListParameters(optionsParameter);
 
-            return method;
-        }
+            // The method body is composed of 3 statements.
+            // The fist one is the declaration of the request object.
+            var requestDeclaration =
+                LocalVariableDeclarationStatement(
+                    _inputOperation.AssociatedRequest.FullyQualifiedName,
+                    "request",
+                    InvocationExpression(
+                        SimpleMemberAccessExpression(
+                            "Client",
+                            "InternalService",
+                            _inputOperation.ParentResource.PluralResourceName,
+                            apiaryOperationName))
+                    .AddArguments(arguments.ToArray()));
 
-        private static string GenerateGetOperationName(string getOperationReturnTypeName)
-        {
-            //Keep just the class name
-            var typeClassName = GetClassNameOnly(getOperationReturnTypeName);
-            return $"Get{typeClassName}";
-        }
+            // The second one is the one that modifies the request if there are options set.
+            var modifyRequest =
+                CondionalSimpleInvocationStatement(
+                    "options",
+                    "ModifyRequest",
+                    "request");
 
-        private static string GenerateBodyParameterName(string bodyParameterTypeName)
-        {
-            if (bodyParameterTypeName == null)
-            {
-                return null;
-            }
-            // Keep just the class name
-            var typeClassName = GetClassNameOnly(bodyParameterTypeName);
-            var oldFirstLetter = typeClassName.First().ToString();
-            var newFirstLetter = oldFirstLetter.ToLower();
-            var newName = new StringBuilder(typeClassName);
-            newName.Replace(oldFirstLetter, newFirstLetter, 0, 1);
-            // Adding this because there was some name clashing with required parameters.
-            newName.Append("Entity");
-            return newName.ToString();
-        }
+            //The third one simply returns the result of executing the request.
+            var returnExecute =
+                ReturnStatement(
+                    InvocationExpression(
+                        SimpleMemberAccessExpression(
+                            "request",
+                            "Execute")));
 
-        private static string GetClassNameOnly(string typeName)
-        {
-            return typeName.Split('.').Last();
-        }
-
-        private static void AddParameter(List<SyntaxNodeOrToken> parameters, string paramName, string paramTypeName)
-        {
-            parameters.Add(
-                Parameter(
-                    Identifier(paramName))
-                .WithType(
-                    IdentifierName(paramTypeName)));
-            parameters.Add(
-                Token(SyntaxKind.CommaToken));
-        }
-
-        private static void AddArgument(List<SyntaxNodeOrToken> arguments, string argName)
-        {
-            arguments.Add(
-                Argument(
-                    IdentifierName(argName)));
-            arguments.Add(
-                Token(SyntaxKind.CommaToken));
+            //Now we can add the three statements to the method body.
+            return method.AddBodyStatements(
+                requestDeclaration,
+                modifyRequest,
+                returnExecute);
         }
     }
 }

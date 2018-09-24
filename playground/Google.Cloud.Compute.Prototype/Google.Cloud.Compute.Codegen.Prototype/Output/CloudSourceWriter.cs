@@ -13,121 +13,41 @@
 // limitations under the License.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
-using System.Linq;
 using System.Threading.Tasks;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
     internal class CloudSourceWriter
     {
-        private SyntaxNode _resources;
-        private SyntaxNode _client;
-
-        internal CloudSourceWriter()
+        public async Task Save(CompilationUnitSyntax resources, CompilationUnitSyntax client)
         {
-            _resources = GetResourcesCompilationUnit();
-            _client = GetClientcompilationUnit();
-        }
+            using (MSBuildWorkspace workspace = MSBuildWorkspace.Create())
+            {
+                Task<Solution> solutionTask = workspace.OpenSolutionAsync(
+                    CodegenConfig.Current.CloudSolutionFilePath);
 
-        public void AddResource(ClassDeclarationSyntax resource)
-        {
-            //_resources is a CompilationUnit
-            // Namespace, we know it's just one.
-            var oldNamespace = (from ns in _resources.ChildNodes().OfType<NamespaceDeclarationSyntax>()
-                                select ns).Single();
+                resources = resources.Format(workspace) as CompilationUnitSyntax;
+                client = client.Format(workspace) as CompilationUnitSyntax;
 
-            var newNamespace = oldNamespace.AddMembers(resource);
+                var solution = await solutionTask;
+                var project = solution.GetProject(CodegenConfig.Current.CloudProjectName);
 
-            // Always update our root SyntaxNode because the whole structure is inmutable.
-            _resources = _resources.ReplaceNode(oldNamespace, newNamespace);
-        }
+                var resourcesDocument = project.CreateOrReplaceDocument(
+                    CodegenConfig.Current.CloudResourcesFileName, resources);
 
-        public void AddResourcePropertyInClient(PropertyDeclarationSyntax property, StatementSyntax propertyInit)
-        {
-            //_client is a CompilationUnit
-            // We know it's just one namespace and one client class.
-            var oldClientClass = (from ns in _client.ChildNodes().OfType<NamespaceDeclarationSyntax>()
-                                  from c in ns.Members.OfType<ClassDeclarationSyntax>()
-                                  select c).Single();
+                // Update our local project reference because the whole structure is inmutable.
+                project = resourcesDocument.Project;
 
-            var newClientClass = oldClientClass.AddMembers(property);
+                var clientDocument = project.CreateOrReplaceDocument(
+                    CodegenConfig.Current.CloudClientFileName, client);
+                // Update our local project reference because the whole structure is inmutable.
+                project = clientDocument.Project;
 
-            var oldInitializeMethod = (from method in newClientClass.Members.OfType<MethodDeclarationSyntax>()
-                                       where method.Identifier.ValueText == CodegenConfig.Current.CloudClientInitResourcesMethodName
-                                       select method).Single();
-
-            var newInitializeMethod = oldInitializeMethod.AddBodyStatements(propertyInit);
-
-            newClientClass = newClientClass.ReplaceNode(oldInitializeMethod, newInitializeMethod);
-
-            // Always update our root SyntaxNode because the whole structure is inmutable.
-            _client = _client.ReplaceNode(oldClientClass, newClientClass);
-        }
-
-        public async Task Save()
-        {
-            var workspace = MSBuildWorkspace.Create();
-            var solutionTask = workspace.OpenSolutionAsync(
-                CodegenConfig.Current.CloudSolutionFilePath);
-
-            _resources = _resources.Format(workspace);
-            _client = _client.Format(workspace);
-
-            var solution = await solutionTask;
-            var project = solution.GetProject(CodegenConfig.Current.CloudProjectName);
-
-            var resourcesDocument = project.CreateOrReplaceDocument(
-                CodegenConfig.Current.CloudResourcesFileName, _resources);
-
-            // Update our local project reference because the whole structure is inmutable.
-            project = resourcesDocument.Project;
-
-            var clientDocument = project.CreateOrReplaceDocument(
-                CodegenConfig.Current.CloudClientFileName, _client);
-            // Update our local project reference because the whole structure is inmutable.
-            project = clientDocument.Project;
-
-            workspace.TryApplyChanges(project.Solution);
-        }
-
-        private CompilationUnitSyntax GetResourcesCompilationUnit()
-        {
-            CompilationUnitSyntax resources =
-                CompilationUnit()
-                .WithMembers(SingletonList<MemberDeclarationSyntax>(
-                        NamespaceDeclaration(
-                            IdentifierName(CodegenConfig.Current.CloudResourcesNamespace))
-                        .WithLeadingTrivia(License.TriviaList)));
-                        
-            return resources;
-        }
-
-        private CompilationUnitSyntax GetClientcompilationUnit()
-        {
-            CompilationUnitSyntax client =
-                CompilationUnit()
-                .WithMembers(SingletonList<MemberDeclarationSyntax>(
-                        NamespaceDeclaration(
-                            IdentifierName(CodegenConfig.Current.CloudClientNamespace))
-                        .WithLeadingTrivia(License.TriviaList)
-                        .WithMembers(SingletonList<MemberDeclarationSyntax>(
-                            ClassDeclaration(CodegenConfig.Current.CloudClientClassName)
-                            .WithModifiers(TokenList(
-                                Token(SyntaxKind.PublicKeyword),
-                                Token(SyntaxKind.PartialKeyword)))
-                            .WithMembers(SingletonList<MemberDeclarationSyntax>(
-                                MethodDeclaration(
-                                    PredefinedType(Token(SyntaxKind.VoidKeyword)),
-                                    CodegenConfig.Current.CloudClientInitResourcesMethodName)
-                                .WithModifiers(TokenList(
-                                    Token(SyntaxKind.PartialKeyword)))
-                                .WithBody(Block())))))));
-
-            return client;
+                workspace.TryApplyChanges(project.Solution);
+                workspace.CloseSolution();
+            }
         }
     }
 }

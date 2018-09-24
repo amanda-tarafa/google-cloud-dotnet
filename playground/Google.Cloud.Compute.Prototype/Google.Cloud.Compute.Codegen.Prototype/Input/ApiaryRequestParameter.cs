@@ -29,25 +29,21 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Input
             _propertyInit = propertyInit ?? throw new ArgumentNullException(nameof(propertyInit));
         }
 
-        public string NameInRequest => _propertyNode.Identifier.ValueText;
-        public string NameInService =>
-            (from attributes in _propertyNode.AttributeLists
-             from attribute in attributes.Attributes
-             from argument in attribute.ArgumentList.Arguments
-             from value in argument.ChildNodes().OfType<LiteralExpressionSyntax>()
-             where attribute.Name.ToString() == CodegenConfig.Current.ApiaryParameterAttributeIdentifier
-             && value.Token.ValueText.Equals(NameInRequest, StringComparison.OrdinalIgnoreCase)
-             select value.Token.ValueText).Single();
+        public string NameInRequest => _propertyNode.GetName();
 
-        public string TypeName => _propertyNode.Type.ToString();
+        public string NameInService => _propertyInit.GetFirstArgumentTextLiteral();
+
+        public string TypeName => _propertyNode.Type.GetName();
 
         public bool IsNullable => TypeName.EndsWith("?") || TypeName.StartsWith("System.Nullable");
 
-        public bool IsRequired =>
-            (from argument in _propertyInit.ArgumentList.Arguments
-             from paramCreationExpression in argument.ChildNodes().OfType<ObjectCreationExpressionSyntax>()
-             from paramProperty in paramCreationExpression.Initializer.Expressions.OfType<AssignmentExpressionSyntax>()
-             where paramProperty.Left.ToString() == CodegenConfig.Current.ApiaryParameterIsRequiredPropertyIdentifier
-             select bool.Parse(paramProperty.Right.ToString())).Single();
+        public bool IsRequired
+        {
+            get
+            {
+                var paramCreationExpresion = _propertyInit.GetFirstArgumentOfType<ObjectCreationExpressionSyntax>();
+                return bool.Parse(paramCreationExpresion.Initializer.GetAssignedTextValueFor(CodegenConfig.Current.ApiaryParameterIsRequiredPropertyIdentifier));
+            }
+        }
     }
 }

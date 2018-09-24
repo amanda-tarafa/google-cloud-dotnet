@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,21 +20,15 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Input
     internal class ApiarySourceParser
     {
         private readonly ApiarySourceReader _reader;
-        private readonly Lazy<IList<ApiaryResource>> _resources;
 
         internal ApiarySourceParser()
         {
             _reader = new ApiarySourceReader();
-            _resources = new Lazy<IList<ApiaryResource>>(InitResources);
         }
 
-        public IEnumerable<ApiaryResource> Resources => _resources.Value;
-
-        private IList<ApiaryResource> InitResources()
-        {
-            return (from c in _reader.ResourcesNamespace?.Members.OfType<ClassDeclarationSyntax>()
-                    where c.Identifier.ValueText.EndsWith(CodegenConfig.Current.ApiaryResourceSuffix)
-                    select new ApiaryResource(c)).ToList();
-        }
+        public IEnumerable<ApiaryResource> Resources =>
+            from c in _reader.Root.FindNamespace(CodegenConfig.Current.ApiaryResourceNamespace)?.
+            FindClassesWithSuffix(CodegenConfig.Current.ApiaryResourceSuffix)
+            select new ApiaryResource(c);
     }
 }

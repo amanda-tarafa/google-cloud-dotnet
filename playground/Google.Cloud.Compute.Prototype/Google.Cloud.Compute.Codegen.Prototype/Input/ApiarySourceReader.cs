@@ -14,7 +14,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.IO;
@@ -30,11 +29,7 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Input
             _syntaxRoot = new Lazy<SyntaxNode>(InitSyntaxRoot);
         }
 
-        public NamespaceDeclarationSyntax ResourcesNamespace =>
-            _syntaxRoot.Value.GetNamespace(CodegenConfig.Current.ApiaryResourceNamespace);
-
-        public NamespaceDeclarationSyntax DataNamespace =>
-            _syntaxRoot.Value.GetNamespace(CodegenConfig.Current.ApiaryDataNamespace);
+        public SyntaxNode Root => _syntaxRoot.Value;
 
         private SyntaxNode InitSyntaxRoot()
         {

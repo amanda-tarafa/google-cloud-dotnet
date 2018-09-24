@@ -16,6 +16,7 @@ using Google.Cloud.Compute.Codegen.Prototype.Input;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using static Google.Cloud.Compute.Codegen.Prototype.RoslynSyntaxFactory;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
@@ -23,70 +24,52 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
     internal class CloudResource
     {
         private readonly ApiaryResource _inputResource;
-        private Lazy<ClassDeclarationSyntax> _syntaxNode;
+        private Lazy<ClassDeclarationSyntax> _resourceClass;
         internal CloudResource(ApiaryResource inputResource)
         {
             _inputResource = inputResource ?? throw new ArgumentNullException(nameof(inputResource));
-            _syntaxNode = new Lazy<ClassDeclarationSyntax>(InitSyntaxNode);
+            _resourceClass = new Lazy<ClassDeclarationSyntax>(InitResourceClass);
         }
 
-        public ClassDeclarationSyntax SyntaxNode => _syntaxNode.Value;
+        public ClassDeclarationSyntax ResourceClass => _resourceClass.Value;
 
-        public string ClassName => SyntaxNode.Identifier.ValueText;
+        public string ResourceClassName => ResourceClass.GetName();
 
-        private ClassDeclarationSyntax InitSyntaxNode()
+        private ClassDeclarationSyntax InitResourceClass()
         {
-            ClassDeclarationSyntax syntaxNode = GetResourceClassDeclaration();
+            ClassDeclarationSyntax @class = BuildResourceClassShell();
 
             foreach (ApiaryOperation inputMethod in _inputResource.StandardOperations)
             {
                 var outputOptions = new CloudOperationOptions(inputMethod);
                 var outputOperation = new CloudOperation(inputMethod, outputOptions);
-                syntaxNode = syntaxNode.AddMembers(outputOptions.SyntaxNode, outputOperation.SyntaxNode);
+                @class = @class.AddMembers(outputOptions.OptionsClass, outputOperation.MethodDeclaration);
             }
 
-            return syntaxNode;
+            return @class;
         }
 
-        private ClassDeclarationSyntax GetResourceClassDeclaration()
+        private ClassDeclarationSyntax BuildResourceClassShell()
         {
             string resourceClassName = $"{_inputResource.PluralResourceName}Client";
             string fullyQualifiedClientClassName = $"{CodegenConfig.Current.CloudClientNamespace}.{CodegenConfig.Current.CloudClientClassName}";
-            ClassDeclarationSyntax classDeclaration =
-                ClassDeclaration(resourceClassName)
-                .WithModifiers(TokenList(
-                    Token(SyntaxKind.PublicKeyword)))
-                .WithMembers(List(new MemberDeclarationSyntax[] {
-                    PropertyDeclaration(
-                        IdentifierName(fullyQualifiedClientClassName),
-                        Identifier("Client"))
-                    .WithModifiers(TokenList(
-                        Token(SyntaxKind.PublicKeyword)))
-                    .WithAccessorList(AccessorList(List(new AccessorDeclarationSyntax[]{
-                        AccessorDeclaration(
-                            SyntaxKind.GetAccessorDeclaration)
-                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
-                        AccessorDeclaration(
-                            SyntaxKind.SetAccessorDeclaration)
-                        .WithModifiers(TokenList(
-                            Token(SyntaxKind.PrivateKeyword)))
-                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))}))),
-                    ConstructorDeclaration(
-                        Identifier(resourceClassName))
-                    .WithModifiers(TokenList(
-                        Token(SyntaxKind.InternalKeyword)))
-                    .WithParameterList(ParameterList(SingletonSeparatedList<ParameterSyntax>(
-                        Parameter(
-                            Identifier("client"))
-                        .WithType(
-                            IdentifierName(fullyQualifiedClientClassName)))))
-                    .WithBody(Block(SingletonList<StatementSyntax>(
-                        ExpressionStatement(
-                            AssignmentExpression(
-                                SyntaxKind.SimpleAssignmentExpression,
-                                IdentifierName("Client"),
-                                IdentifierName("client"))))))}));
-            return classDeclaration;
+
+            var constructor =
+                ConstructorDeclaration(resourceClassName, SyntaxKind.InternalKeyword)
+                .AddParameters(
+                    (typeName: fullyQualifiedClientClassName, identifier: "client"))
+                .AddBodyStatements(
+                    SimpleAssignmentStatement("Client", "client"));
+
+            var clientProperty =
+                PropertyDeclaration(
+                    fullyQualifiedClientClassName,
+                    "Client",
+                    SyntaxKind.PublicKeyword)
+                .WithGet();
+
+            return ClassDeclaration(resourceClassName, SyntaxKind.PublicKeyword)
+                .AddMembers(clientProperty, constructor);
         }
     }
 }

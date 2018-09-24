@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -25,26 +24,25 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Input
         private readonly ClassDeclarationSyntax _requestNode;
         private readonly ApiaryResource _parent;
         private readonly Lazy<IList<ApiaryRequestParameter>> _allParameters;
-        private readonly Lazy<ApiaryRequestBody> _body;
+        private readonly Lazy<ApiaryRequestBody> _bodyParameter;
         internal ApiaryRequest(ClassDeclarationSyntax requestNode, ApiaryResource parent)
         {
             _requestNode = requestNode ?? throw new ArgumentNullException(nameof(requestNode));
             _parent = parent ?? throw new ArgumentNullException(nameof(parent));
             _allParameters = new Lazy<IList<ApiaryRequestParameter>>(InitAllParameters);
-            _body = new Lazy<ApiaryRequestBody>(InitBody);
+            _bodyParameter = new Lazy<ApiaryRequestBody>(InitBodyParameter);
         }
 
-        public string ClassName => _requestNode.Identifier.ValueText;
+        public string ClassName => _requestNode.GetName();
         public string FullyQualifiedName => $"{_parent.FullyQualifiedName}.{ClassName}";
 
         public string RequestReturnTypeName =>
-            // This assumes that the first type parameter of the apiary request base type
-            // is the type return by executing the request.
-            (from baseType in _requestNode.BaseList.Types
-             from genericType in baseType.ChildNodes().OfType<GenericNameSyntax>()
-             from typeArgument in genericType.TypeArgumentList.Arguments
-             where genericType.ToString().StartsWith(CodegenConfig.Current.ApiaryRequestBaseTypeIdentifier)
-             select typeArgument.ToString()).Single();
+            // This assumes that the only type parameter of the apiary request base type
+            // is the type returned by executing the request.
+            _requestNode.
+            FindGenericBaseType(CodegenConfig.Current.ApiaryRequestBaseTypeIdentifier).
+            GetTypeArguments().Single()
+            .GetName();
 
         public IEnumerable<ApiaryRequestParameter> RequieredParameters =>
             from parameter in _allParameters.Value
@@ -56,44 +54,44 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Input
             where !parameter.IsRequired
             select parameter;
 
-        public ApiaryRequestBody BodyParameter => _body.Value;
+        public ApiaryRequestBody BodyParameter => _bodyParameter.Value;
 
         public bool IsLongRunning =>
-            (from baseType in _requestNode.BaseList.Types
-             where baseType.ToString().Contains(CodegenConfig.Current.ApiaryLongRunningOperationTypeIdentifier)
-             select baseType).Any();
+            RequestReturnTypeName.Equals(CodegenConfig.Current.ApiaryLongRunningOperationTypeIdentifier);
 
         public bool IsList =>
-            (from property in _requestNode.Members.OfType<PropertyDeclarationSyntax>()
-             where property.Identifier.ValueText == CodegenConfig.Current.ApiaryListOperationPropertyIdentifier
-             select property).Any();
+            _requestNode.FindProperty(CodegenConfig.Current.ApiaryListOperationPropertyIdentifier) != null;
 
         public bool IsStandard => !IsList && !IsLongRunning;
 
         private IList<ApiaryRequestParameter> InitAllParameters()
         {
-            var propertyInitStatements =
-                from method in _requestNode.Members.OfType<MethodDeclarationSyntax>()
-                from statement in method.Body.Statements
+            // Only way to know if a request parameter is required is by examining
+            // the paramater initialization statement.
+            // Here we are grabbing all paramenter initialization statements.
+            var initParamMethod = _requestNode.FindMethod(CodegenConfig.Current.ApiaryInitParameterMethodIdentifier);
+            var paramPropertyInitStatements =
+                from statement in initParamMethod.Body.Statements
                 from invocation in statement.DescendantNodes().OfType<InvocationExpressionSyntax>()
-                where method.Identifier.ToString() == CodegenConfig.Current.ApiaryInitParameterMethodIdentifier
-                && invocation.Expression.ToString() == CodegenConfig.Current.ApiaryInitParameterStatementIdentifier
+                where invocation.Expression.ToString() == CodegenConfig.Current.ApiaryInitParameterStatementIdentifier
                 select invocation;
 
-            return (from property in _requestNode.Members.OfType<PropertyDeclarationSyntax>()
-                    from attributes in property.AttributeLists
-                    from attribute in attributes.Attributes
-                    from argument in attribute.ArgumentList.Arguments
-                    join propertyInit in propertyInitStatements on argument.Expression.ToString() equals propertyInit.ArgumentList.Arguments.First().Expression.ToString()
-                    where attribute.Name.ToString() == CodegenConfig.Current.ApiaryParameterAttributeIdentifier
-                    select new ApiaryRequestParameter(property, propertyInit)).ToList();
+            // Get all properties that are marked as request parameters.
+            var paramProperties = _requestNode.FindPropertiesWithAttribute(CodegenConfig.Current.ApiaryParameterAttributeIdentifier);
+
+            // Cross each property with their init statement so as to obtain all info neccesary
+            // to build and ApiaryRequestParameter instance.
+            return (from markedProperty in paramProperties
+                    join propertyInit in paramPropertyInitStatements
+                    on markedProperty.attribute.GetFirstArgumentTextLiteral()
+                    equals propertyInit.GetFirstArgumentTextLiteral()
+                    select new ApiaryRequestParameter(markedProperty.property, propertyInit)).ToList();
         }
 
-        private ApiaryRequestBody InitBody()
+        private ApiaryRequestBody InitBodyParameter()
         {
-            return (from property in _requestNode.Members.OfType<PropertyDeclarationSyntax>()
-                    where property.Identifier.ToString() == CodegenConfig.Current.ApiaryBodyParameterPropertyIdentifier
-                    select new ApiaryRequestBody(property)).SingleOrDefault();
+            var bodyProperty = _requestNode.FindProperty(CodegenConfig.Current.ApiaryBodyParameterPropertyIdentifier);
+            return bodyProperty == null ? null : new ApiaryRequestBody(bodyProperty);
         }
     }
 }

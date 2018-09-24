@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -23,31 +22,34 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Input
     internal class ApiaryOperation
     {
         private readonly MethodDeclarationSyntax _methodNode;
+        private readonly Lazy<ApiaryRequest> _associatedRequest;
 
         internal ApiaryOperation(MethodDeclarationSyntax methodNode, ApiaryResource parentResource)
         {
             _methodNode = methodNode ?? throw new ArgumentNullException(nameof(methodNode));
             ParentResource = parentResource ?? throw new ArgumentNullException(nameof(parentResource));
 
-            var associatedRequestTypeName = _methodNode.ReturnType.ToString();
-            AssociatedRequest = parentResource.FindRequestClass(associatedRequestTypeName);
+            _associatedRequest = new Lazy<ApiaryRequest>(InitAssociatedRequest);
         }
 
         public IEnumerable<ApiaryRequestParameter> SortedRequiredParameters =>
-            from param in _methodNode.ParameterList.Parameters
-            join reqParam in AssociatedRequest.RequieredParameters on param.Identifier.ToString() equals reqParam.NameInService
+            from param in _methodNode.GetParameters()
+            join reqParam in AssociatedRequest.RequieredParameters on param.GetName() equals reqParam.NameInService
             select reqParam;
 
-        public ApiaryRequest AssociatedRequest { get; }
+        public ApiaryRequest AssociatedRequest => _associatedRequest.Value;
 
         public ApiaryResource ParentResource { get; }
 
-        public string OperationName => _methodNode.Identifier.ValueText;
+        public string OperationName => _methodNode.GetName();
+
+        public bool IsStandardOperation => AssociatedRequest.IsStandard;
 
         public bool IsLongRunningOperation => AssociatedRequest.IsLongRunning;
 
         public bool IsListOperation => AssociatedRequest.IsList;
 
-        public bool IsStandardOperation => AssociatedRequest.IsStandard;
+        private ApiaryRequest InitAssociatedRequest() =>
+            ParentResource.FindRequestClass(_methodNode.GetReturnTypeName());
     }
 }

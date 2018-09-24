@@ -13,17 +13,28 @@
 // limitations under the License.
 
 using Google.Cloud.Compute.Codegen.Prototype.Input;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using static Google.Cloud.Compute.Codegen.Prototype.RoslynSyntaxFactory;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
 {
     internal class CloudSourceParser
     {
-        private readonly CloudSourceWriter _writer;
+        private readonly IList<ClassDeclarationSyntax> _resources;
+        private readonly IList<PropertyDeclarationSyntax> _resourceProperties;
+        private readonly IList<StatementSyntax> _resourcePropertiesInit;
 
         internal CloudSourceParser()
         {
-            _writer = new CloudSourceWriter();
+            _resources = new List<ClassDeclarationSyntax>();
+            _resourceProperties = new List<PropertyDeclarationSyntax>();
+            _resourcePropertiesInit = new List<StatementSyntax>();
         }
 
         public void AddResource(ApiaryResource inputResource)
@@ -31,13 +42,54 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
             var outputResource = new CloudResource(inputResource);
             var outputResourceProperty = new CloudResourceProperty(inputResource, outputResource);
 
-            _writer.AddResource(outputResource.SyntaxNode);
-            _writer.AddResourcePropertyInClient(outputResourceProperty.PropertySyntaxNode, outputResourceProperty.PropertyInitSyntaxNode);
+            _resources.Add(outputResource.ResourceClass);
+            _resourceProperties.Add(outputResourceProperty.ResourcePropertyDeclaration);
+            _resourcePropertiesInit.Add(outputResourceProperty.ResourcePropertyInit);
         }
 
         public async Task Save()
         {
-            await _writer.Save();
+            var resourcesNode = BuildResouresNode();
+            var clientNode = BuildClientNode();
+
+            CloudSourceWriter _writer = new CloudSourceWriter();
+            await _writer.Save(resourcesNode, clientNode);
+        }
+
+        private CompilationUnitSyntax BuildResouresNode()
+        {
+            NamespaceDeclarationSyntax resourcesNamespace =
+                NamespaceDeclaration(CodegenConfig.Current.CloudResourcesNamespace)
+                .WithLeadingTrivia(License.TriviaList)
+                .AddMembers(_resources.ToArray());
+
+            return CompilationUnit()
+                .AddMembers(resourcesNamespace);
+        }
+
+        private CompilationUnitSyntax BuildClientNode()
+        {
+            MethodDeclarationSyntax propertyInitMethod =
+                VoidMethodDeclaration(
+                    CodegenConfig.Current.CloudClientInitResourcesMethodName,
+                    SyntaxKind.PartialKeyword)
+                .AddBodyStatements(_resourcePropertiesInit.ToArray());
+
+            ClassDeclarationSyntax clientClass =
+                ClassDeclaration(
+                    CodegenConfig.Current.CloudClientClassName,
+                    SyntaxKind.PublicKeyword,
+                    SyntaxKind.PartialKeyword)
+                .AddMembers(_resourceProperties.ToArray())
+                .AddMembers(propertyInitMethod);
+
+            NamespaceDeclarationSyntax clientNamespace =
+                NamespaceDeclaration(CodegenConfig.Current.CloudClientNamespace)
+                .WithLeadingTrivia(License.TriviaList)
+                .AddMembers(clientClass);
+
+            return CompilationUnit()
+                .AddMembers(clientNamespace);
         }
     }
 }

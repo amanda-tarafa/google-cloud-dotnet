@@ -16,6 +16,7 @@ using Google.Cloud.Compute.Codegen.Prototype.Input;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using static Google.Cloud.Compute.Codegen.Prototype.RoslynSyntaxFactory;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Google.Cloud.Compute.Codegen.Prototype.Output
@@ -25,52 +26,40 @@ namespace Google.Cloud.Compute.Codegen.Prototype.Output
         private readonly string _fullyQualifiedResourceClassName;
         private readonly CloudResource _resource;
         private readonly ApiaryResource _inputResource;
+        private readonly Lazy<PropertyDeclarationSyntax> _property;
+        private readonly Lazy<StatementSyntax> _propertyInit;
+
         internal CloudResourceProperty(ApiaryResource inputResource, CloudResource outputResource)
         {
             _inputResource = inputResource ?? throw new ArgumentNullException(nameof(inputResource));
             _resource = outputResource ?? throw new ArgumentNullException(nameof(outputResource));
-            _fullyQualifiedResourceClassName = $"{CodegenConfig.Current.CloudResourcesNamespace}.{_resource.ClassName}";
+
+            _fullyQualifiedResourceClassName = $"{CodegenConfig.Current.CloudResourcesNamespace}.{_resource.ResourceClassName}";
+
+            _property = new Lazy<PropertyDeclarationSyntax>(InitResourcePropertyDeclaration);
+            _propertyInit = new Lazy<StatementSyntax>(InitResourcePropertyInitStatement);
         }
 
-        public PropertyDeclarationSyntax PropertySyntaxNode =>
-            GetResourcePropertyDeclaration();
+        public PropertyDeclarationSyntax ResourcePropertyDeclaration => _property.Value;
 
-        public StatementSyntax PropertyInitSyntaxNode =>
-            GetResourcePropertyInitializeStatement();
+        public StatementSyntax ResourcePropertyInit => _propertyInit.Value;
 
-        private PropertyDeclarationSyntax GetResourcePropertyDeclaration()
+        private PropertyDeclarationSyntax InitResourcePropertyDeclaration() =>
+            PropertyDeclaration(
+                _fullyQualifiedResourceClassName,
+                _inputResource.PluralResourceName,
+                SyntaxKind.PublicKeyword)
+            .WithGet()
+            .WithSet(modifiers: SyntaxKind.PrivateKeyword);
+
+        private StatementSyntax InitResourcePropertyInitStatement()
         {
-            PropertyDeclarationSyntax property =
-                PropertyDeclaration(
-                    IdentifierName(_fullyQualifiedResourceClassName),
-                    Identifier(_inputResource.PluralResourceName))
-                .WithModifiers(TokenList(
-                    Token(SyntaxKind.PublicKeyword)))
-                .WithAccessorList(AccessorList(List(new AccessorDeclarationSyntax[]{
-                    AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration)
-                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)),
-                    AccessorDeclaration(
-                        SyntaxKind.SetAccessorDeclaration)
-                    .WithModifiers(TokenList(
-                        Token(SyntaxKind.PrivateKeyword)))
-                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))})));
-            return property;
-        }
-
-        private StatementSyntax GetResourcePropertyInitializeStatement()
-        {
-            ExpressionStatementSyntax statement =
-                ExpressionStatement(
-                    AssignmentExpression(
-                        SyntaxKind.SimpleAssignmentExpression,
-                            IdentifierName(_inputResource.PluralResourceName),
-                            ObjectCreationExpression(
-                                IdentifierName(_fullyQualifiedResourceClassName))
-                            .WithArgumentList(ArgumentList(SingletonSeparatedList(
-                                Argument(
-                                    ThisExpression()))))));
-            return statement;
+            var resourceCration =
+                ObjectCreationExpression(_fullyQualifiedResourceClassName)
+                .AddArgumentListArguments(Argument(ThisExpression()));
+            return SimpleAssignmentStatement(
+                _inputResource.PluralResourceName,
+                resourceCration);
         }
     }
 }
