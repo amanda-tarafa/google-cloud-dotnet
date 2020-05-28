@@ -156,6 +156,28 @@ namespace Google.Cloud.BigQuery.V2
             return new BigQueryRoutine(this, routine);
         }
 
+        /// <inheritdoc />
+        public override BigQueryRoutine PatchRoutine(RoutineReference routineReference, Routine resource, PatchRoutineOptions options = null)
+        {
+            // There's no Patch API for Routines. The service team are working on it.
+            // In the meantime we should provide Patch functionality via Update.
+            CheckResourceReference(routineReference, resource);
+            var existingRoutine = GetRoutine(routineReference).Resource;
+            Patch(existingRoutine, resource);
+            return UpdateRoutine(routineReference, existingRoutine);
+        }
+
+        /// <inheritdoc />
+        public async override Task<BigQueryRoutine> PatchRoutineAsync(RoutineReference routineReference, Routine resource, PatchRoutineOptions options = null, CancellationToken cancellationToken = default)
+        {
+            // There's no Patch API for Routines. The service team are working on it.
+            // In the meantime we should provide Patch functionality via Update.
+            CheckResourceReference(routineReference, resource);
+            var existingRoutine = (await GetRoutineAsync(routineReference, cancellationToken: cancellationToken).ConfigureAwait(false)).Resource;
+            Patch(existingRoutine, resource);
+            return await UpdateRoutineAsync(routineReference, existingRoutine, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
         private GetRequest CreateGetRoutineRequest(RoutineReference routineReference, GetRoutineOptions options)
         {
             GaxPreconditions.CheckNotNull(routineReference, nameof(routineReference));
@@ -200,6 +222,42 @@ namespace Google.Cloud.BigQuery.V2
             options?.ModifyRequest(request);
             RetryIfETagPresent(request, resource);
             return request;
+        }
+
+        /// <summary>
+        /// Overrides values in <paramref name="existing"/> with all set values in <paramref name="mutations"/>.
+        /// </summary>
+        /// <param name="existing">The resource that will be modified. Values in this resource will be overriden
+        /// by set values on <paramref name="mutations"/>.</param>
+        /// <param name="mutations">The resource containing the changes that will be applied to <paramref name="existing"/>.</param>
+        /// <remarks>This modifies <paramref name="existing"/>. This method only exists to provide Patch support and should
+        /// only be used with a fresh <paramref name="existing"/> resource that won't be exposed outside of the patch operation.</remarks>
+        private static void Patch(Routine existing, Routine mutations)
+        {
+            GaxPreconditions.CheckNotNull(existing, nameof(existing));
+            CheckResourceReference(existing.RoutineReference, mutations);
+
+            // Always overwrite the Etag, we would have sent mutations if there
+            // was a Patch API.
+            existing.ETag = mutations.ETag;
+
+            var routineType = mutations.GetRoutineType();
+            if (routineType is object)
+            {
+                existing.SetRoutineType(routineType);
+            }
+
+            var routineLang = mutations.GetRoutineLanguage();
+            if (routineLang is object)
+            {
+                existing.SetRoutineLanguage(routineLang);
+            }
+
+            existing.Arguments = mutations.Arguments ?? existing.Arguments;
+            existing.ReturnType = mutations.ReturnType ?? existing.ReturnType;
+            existing.ImportedLibraries = mutations.ImportedLibraries ?? existing.ImportedLibraries;
+            existing.DefinitionBody = mutations.DefinitionBody ?? existing.DefinitionBody;
+            existing.Description = mutations.Description ?? existing.Description;
         }
 
         private static void CheckResourceReference(RoutineReference routineReference, Routine resource)

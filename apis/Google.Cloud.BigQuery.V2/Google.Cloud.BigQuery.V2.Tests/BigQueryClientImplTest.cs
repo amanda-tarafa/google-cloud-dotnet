@@ -417,6 +417,38 @@ namespace Google.Cloud.BigQuery.V2.Tests
         }
 
         [Fact]
+        public void PatchRoutine()
+        {
+            var projectId = "project";
+            var datasetId = "dataset";
+            var routineId = "routine";
+            var service = new FakeBigqueryService();
+            var client = new BigQueryClientImpl(projectId, service);
+            var reference = client.GetRoutineReference(projectId, datasetId, routineId);
+            service.ExpectRequest(
+                service.Routines.Get(projectId, datasetId, routineId),
+                new Routine
+                {
+                    RoutineReference = reference,
+                    Description = "existing",
+                    DefinitionBody = "SELECT *"
+                });
+            service.ExpectRequest(
+                service.Routines.Update(new Routine()
+                {
+                    RoutineReference = reference,
+                    Description = "patched",
+                    DefinitionBody = "SELECT *"
+                }, projectId, datasetId, routineId),
+                new Routine { RoutineReference = reference, Description = "patched", DefinitionBody = "SELECT *" });
+            var result = client.PatchRoutine(reference, new Routine { Description = "patched" });
+            Assert.Equal(projectId, result.Reference.ProjectId);
+            Assert.Equal(datasetId, result.Reference.DatasetId);
+            Assert.Equal(routineId, result.Reference.RoutineId);
+            Assert.Equal("patched", result.Resource.Description);
+        }
+
+        [Fact]
         public void GetJob()
         {
             var projectId = "project";
@@ -739,6 +771,38 @@ namespace Google.Cloud.BigQuery.V2.Tests
             Assert.Equal(datasetId, result.Reference.DatasetId);
             Assert.Equal(routineId, result.Reference.RoutineId);
             Assert.Equal("updated", result.Resource.Description);
+        }
+
+        [Fact]
+        public async Task PatchRoutineAsync()
+        {
+            var projectId = "project";
+            var datasetId = "dataset";
+            var routineId = "routine";
+            var service = new FakeBigqueryService();
+            var client = new BigQueryClientImpl(projectId, service);
+            var reference = client.GetRoutineReference(projectId, datasetId, routineId);
+            service.ExpectRequest(
+                service.Routines.Get(projectId, datasetId, routineId),
+                new Routine
+                {
+                    RoutineReference = reference,
+                    Description = "existing",
+                    DefinitionBody = "SELECT *"
+                });
+            service.ExpectRequest(
+                service.Routines.Update(new Routine()
+                {
+                    RoutineReference = reference,
+                    Description = "patched",
+                    DefinitionBody = "SELECT *"
+                }, projectId, datasetId, routineId),
+                new Routine { RoutineReference = reference, Description = "patched", DefinitionBody = "SELECT *" });
+            var result = await client.PatchRoutineAsync(reference, new Routine { Description = "patched" });
+            Assert.Equal(projectId, result.Reference.ProjectId);
+            Assert.Equal(datasetId, result.Reference.DatasetId);
+            Assert.Equal(routineId, result.Reference.RoutineId);
+            Assert.Equal("patched", result.Resource.Description);
         }
 
         [Fact]

@@ -68,4 +68,21 @@
     </Comments>
   </Method>
 
+  <Method Name="PatchRoutine"
+      TargetType="Routine"
+      ReturnType="BigQueryRoutine">
+        <AdditionalParameters>
+            <Parameter Name="resource" Type="Routine" Comment="The routine resource representation to use for the patch. Only fields present in the resource will be updated. If this routine's &lt;see cref=&quot;Routine.RoutineReference&quot;/&gt; is specified, then it must be the same as the one obtained from the other parameters, else it will be set to the one obtained from the other parameters." />
+        </AdditionalParameters>
+        <Comments>
+            <summary>
+                Patches {target} with fields in the given resource.
+            </summary>
+            <remarks>
+                If the resource contains an ETag, it is used for optimistic concurrency validation.
+            </remarks>
+            <returns>The updated routine.</returns>
+        </Comments>
+    </Method>
+
 </File>

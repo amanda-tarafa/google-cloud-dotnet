@@ -218,5 +218,37 @@ namespace Google.Cloud.BigQuery.V2.IntegrationTests
             var exception = Assert.Throws<GoogleApiException>(() => original.Update());
             Assert.Equal(HttpStatusCode.PreconditionFailed, exception.HttpStatusCode);
         }
+
+        [Fact]
+        public void Patch()
+        {
+            var client = BigQueryClient.Create(_fixture.ProjectId);
+            string datasetId = _fixture.DatasetId;
+            var dataset = client.GetDataset(_fixture.DatasetId);
+            var routineId = _fixture.CreateRoutineId();
+            _fixture.CreateRoutine(routineId, dataset);
+
+            var patched = client.PatchRoutine(datasetId, routineId, new Routine { Description = "patched routine" });
+
+            Assert.Equal(routineId, patched.Reference.RoutineId);
+            Assert.Equal("patched routine", patched.Resource.Description);
+            Assert.Equal("SELECT 1;", patched.Resource.DefinitionBody);
+        }
+
+        [Fact]
+        public async Task PatchAsync()
+        {
+            var client = BigQueryClient.Create(_fixture.ProjectId);
+            string datasetId = _fixture.DatasetId;
+            var dataset = client.GetDataset(_fixture.DatasetId);
+            var routineId = _fixture.CreateRoutineId();
+            _fixture.CreateRoutine(routineId, dataset);
+
+            var patched = await client.PatchRoutineAsync(datasetId, routineId, new Routine { Description = "patched routine" });
+
+            Assert.Equal(routineId, patched.Reference.RoutineId);
+            Assert.Equal("patched routine", patched.Resource.Description);
+            Assert.Equal("SELECT 1;", patched.Resource.DefinitionBody);
+        }
     }
 }

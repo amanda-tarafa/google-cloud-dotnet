@@ -126,5 +126,47 @@ namespace Google.Cloud.BigQuery.V2
         /// the updated routine.</returns>
         public Task<BigQueryRoutine> UpdateAsync(Routine resource = null, UpdateRoutineOptions options = null, CancellationToken cancellationToken = default) =>
             _client.UpdateRoutineAsync(Reference, resource ?? Resource, options, cancellationToken);
+
+        /// <summary>
+        /// Patches this routine with fields in the specified resource.
+        /// </summary>
+        /// <remarks>
+        /// This method delegates to <see cref="BigQueryClient.PatchRoutine(RoutineReference, Routine, PatchRoutineOptions)"/>.
+        /// </remarks>
+        /// <param name="resource">The resource to patch with. Must not be null.</param>
+        /// <param name="matchETag">If true, the etag from <see cref="Resource"/> is propagated into <paramref name="resource"/> for
+        /// optimistic concurrency. Otherwise, <paramref name="resource"/> is left unchanged.</param>
+        /// <param name="options">The options for the operation. May be null, in which case defaults will be supplied.</param>
+        /// <returns>The updated routine.</returns>
+        public BigQueryRoutine Patch(Routine resource, bool matchETag, PatchRoutineOptions options = null)
+        {
+            if (matchETag)
+            {
+                resource.ETag = Resource.ETag;
+            }
+            return _client.PatchRoutine(Reference, resource, options);
+        }
+
+        /// <summary>
+        /// Asynchronously patches this routine with fields in the specified resource.
+        /// </summary>
+        /// <remarks>
+        /// This method delegates to <see cref="BigQueryClient.PatchRoutineAsync(RoutineReference, Routine, PatchRoutineOptions, CancellationToken)"/>.
+        /// </remarks>
+        /// <param name="resource">The resource to patch with. Must not be null.</param>
+        /// <param name="matchETag">If true, the etag from <see cref="Resource"/> is propagated into <paramref name="resource"/> for
+        /// optimistic concurrency. Otherwise, <paramref name="resource"/> is left unchanged.</param>
+        /// <param name="options">The options for the operation. May be null, in which case defaults will be supplied.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task representing the asynchronous operation. When complete, the result is
+        /// the updated routine.</returns>
+        public Task<BigQueryRoutine> PatchAsync(Routine resource, bool matchETag, PatchRoutineOptions options = null, CancellationToken cancellationToken = default)
+        {
+            if (matchETag)
+            {
+                resource.ETag = Resource.ETag;
+            }
+            return _client.PatchRoutineAsync(Reference, resource, options, cancellationToken);
+        }
     }
 }

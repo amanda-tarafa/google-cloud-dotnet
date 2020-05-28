@@ -611,6 +611,21 @@ namespace Google.Cloud.BigQuery.V2.Tests
         }
 
         [Fact]
+        public void PatchRoutineEquivalents()
+        {
+            var datasetId = "dataset";
+            var routineId = "table";
+            var reference = GetRoutineReference(datasetId, routineId);
+            var resource = new Routine();
+            var options = new PatchRoutineOptions();
+            VerifyEquivalent(new BigQueryRoutine(new DerivedBigQueryClient(), resource),
+                client => client.PatchRoutine(MatchesWhenSerialized(reference), resource, options),
+                client => client.PatchRoutine(datasetId, routineId, resource, options),
+                client => client.PatchRoutine(ProjectId, datasetId, routineId, resource, options),
+                client => new BigQueryRoutine(client, GetRoutine(reference)).Patch(resource, false, options));
+        }
+
+        [Fact]
         public void GetJobEquivalents()
         {
             var jobId = "job";
@@ -1275,6 +1290,22 @@ namespace Google.Cloud.BigQuery.V2.Tests
                 client => client.UpdateRoutineAsync(datasetId, routineId, resource, options, token),
                 client => client.UpdateRoutineAsync(ProjectId, datasetId, routineId, resource, options, token),
                 client => new BigQueryRoutine(client, GetRoutine(reference)).UpdateAsync(resource, options, token));
+        }
+
+        [Fact]
+        public void PatchRoutineAsyncEquivalents()
+        {
+            var datasetId = "dataset";
+            var routineId = "table";
+            var reference = GetRoutineReference(datasetId, routineId);
+            var resource = new Routine();
+            var options = new PatchRoutineOptions();
+            var token = new CancellationTokenSource().Token;
+            VerifyEquivalentAsync(new BigQueryRoutine(new DerivedBigQueryClient(), resource),
+                client => client.PatchRoutineAsync(MatchesWhenSerialized(reference), resource, options, token),
+                client => client.PatchRoutineAsync(datasetId, routineId, resource, options, token),
+                client => client.PatchRoutineAsync(ProjectId, datasetId, routineId, resource, options, token),
+                client => new BigQueryRoutine(client, GetRoutine(reference)).PatchAsync(resource, false, options, token));
         }
 
         [Fact]
