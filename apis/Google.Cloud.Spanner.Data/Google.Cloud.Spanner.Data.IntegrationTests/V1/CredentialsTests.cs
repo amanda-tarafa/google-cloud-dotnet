@@ -76,6 +76,7 @@ namespace Google.Cloud.Spanner.V1.IntegrationTests
         }
 
         [Fact]
+        [Obsolete]
         public void NoChannel_GoodCall()
         {
             var builder = new SpannerClientBuilder
@@ -97,6 +98,7 @@ namespace Google.Cloud.Spanner.V1.IntegrationTests
         }
 
         [Fact]
+        [Obsolete]
         public void NoChannel_BadCall()
         {
             var builder = new SpannerClientBuilder
@@ -144,6 +146,7 @@ namespace Google.Cloud.Spanner.V1.IntegrationTests
         #region Tests that test for credential clashing
 
         [Fact]
+        [Obsolete]
         public void GoodChannel_BadCall_ListOperation()
         {
             var builder = new SpannerClientBuilder
@@ -165,6 +168,7 @@ namespace Google.Cloud.Spanner.V1.IntegrationTests
         }
 
         [Fact]
+        [Obsolete]
         public void BadChannel_GoodCall_ListOperation()
         {
             var builder = new SpannerClientBuilder
@@ -185,6 +189,7 @@ namespace Google.Cloud.Spanner.V1.IntegrationTests
         }
 
         [Fact]
+        [Obsolete]
         public void GoodChannel_BadCall_CreateOperation()
         {
             var builder = new SpannerClientBuilder
@@ -208,6 +213,7 @@ namespace Google.Cloud.Spanner.V1.IntegrationTests
         }
 
         [Fact]
+        [Obsolete]
         public void BadChannel_GoodCall_CreateOperation()
         {
             var builder = new SpannerClientBuilder
@@ -241,6 +247,7 @@ namespace Google.Cloud.Spanner.V1.IntegrationTests
         #region Possible workarounds (exploration)
 
         [Fact]
+        [Obsolete]
         public void BadChannel_GoodCall_TweakedInterceptors()
         {
             // We don't know in what order the credential interceptors are executed.
