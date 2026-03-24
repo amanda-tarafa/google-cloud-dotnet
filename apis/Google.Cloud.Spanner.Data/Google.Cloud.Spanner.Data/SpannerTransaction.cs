@@ -151,7 +151,7 @@ namespace Google.Cloud.Spanner.Data
         /// </list>
         /// </para>
         /// </remarks>
-        public TimestampBound TimestampBound => _creationOptions.TimestampBound ?? _creationOptions.TransactionId?.TimestampBound;
+        public TimestampBound TimestampBound => _creationOptions.EffectiveTimestampBound;
 
         /// <inheritdoc />
         protected override DbConnection DbConnection => SpannerConnection;

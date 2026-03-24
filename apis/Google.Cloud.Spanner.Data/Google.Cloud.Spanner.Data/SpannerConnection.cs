@@ -592,7 +592,7 @@ namespace Google.Cloud.Spanner.Data
                     {
                         SessionName sessionName = SessionName.Parse(transactionCreationOptions.TransactionId.Session);
                         ByteString transactionIdBytes = ByteString.FromBase64(transactionCreationOptions.TransactionId.Id);
-                        var timestamp = transactionCreationOptions.TransactionId.TimestampBound?.Timestamp;
+                        var timestamp = transactionCreationOptions.EffectiveTimestampBound?.Timestamp;
                         var readTimestamp = timestamp.HasValue ? Protobuf.WellKnownTypes.Timestamp.FromDateTime(timestamp.Value) : null;
                         transaction = ManagedTransaction.FromTransaction(
                             _managedSession.Client, new Session { SessionName = sessionName }, transactionIdBytes, transactionCreationOptions.GetTransactionOptions(), readTimestamp);
