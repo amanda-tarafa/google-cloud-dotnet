@@ -23,6 +23,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using static Google.Cloud.PubSub.V1.SubscriberClient;
 
 // Tests create quite a few tasks that don't need awaiting.
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -135,6 +136,7 @@ namespace Google.Cloud.PubSub.V1.IntegrationTests
             long recvSum = 0L; // Sum of bytes of received messages
             var recvedIds = new ConcurrentDictionary<int, bool>();
             var nackedIds = new HashSet<int>();
+            using CancellationTokenSource stopCancellation = new CancellationTokenSource();
             Task subTask = subscriber.StartAsync((msg, ct) =>
             {
                 int id = BitConverter.ToInt32(msg.Data.ToArray(), 0);
@@ -159,7 +161,8 @@ namespace Google.Cloud.PubSub.V1.IntegrationTests
                     {
                         // Test finished, so stop subscriber
                         Console.WriteLine("All msgs received, stopping subscriber.");
-                        Task unused = subscriber.StopAsync(TimeSpan.FromSeconds(15));
+                        stopCancellation.CancelAfter(TimeSpan.FromSeconds(15));
+                        Task unused = subscriber.StopAsync(new ShutdownOptions { Mode = ShutdownMode.NackImmediately }, stopCancellation.Token);
                     }
                 }
                 else
@@ -196,7 +199,7 @@ namespace Google.Cloud.PubSub.V1.IntegrationTests
                         {
                             // Deadlock, shutdown subscriber, and cancel
                             Console.WriteLine("Deadlock detected. Cancelling test");
-                            subscriber.StopAsync(new CancellationToken(true));
+                            subscriber.StopAsync(new ShutdownOptions(), new CancellationToken(true));
                             watchdogCts.Cancel();
                             break;
                         }
@@ -257,7 +260,11 @@ namespace Google.Cloud.PubSub.V1.IntegrationTests
 
             if (cancelAfterRecvCount is int cancelAfter)
             {
-                Assert.True(recvCount >= cancelAfter && recvCount <= cancelAfter + maxMessagesInFlight, $"Incorrect recvCount: {recvCount}");
+                // Because  we are using linked tokens for cancellation, which do not guarantee
+                // atomicity between when a parent token is cancelled to when the linked token is cancelled,
+                // there's still a chance that we get some more messages after cancelling, even with NackInmediately.
+                // So we expecte up to 3 times messages in flight after the cutoff message count.
+                Assert.True(recvCount >= cancelAfter && recvCount <= cancelAfter + 3 * maxMessagesInFlight, $"Incorrect recvCount: {recvCount}");
             }
             else
             {
@@ -431,9 +438,12 @@ namespace Google.Cloud.PubSub.V1.IntegrationTests
                     });
                     await Task.Delay(subscriberLifetime);
                     Console.WriteLine("Stopping subscriber");
-                    Task stopTask = subscriber.StopAsync(TimeSpan.FromSeconds(15));
-                    // If shutdown times-out then stopTask, and also Task.WhenAll will cancel, causing the test to fail.
-                    await Task.WhenAll(subscribeTask, stopTask);
+                    using var stopCancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                    {
+                        Task stopTask = subscriber.StopAsync(new ShutdownOptions { Mode = ShutdownMode.NackImmediately }, stopCancellationSource.Token);
+                        // If shutdown times-out then stopTask, and also Task.WhenAll will cancel, causing the test to fail.
+                        await Task.WhenAll(subscribeTask, stopTask);
+                    }
                     int recvCount = recvedMsgs.Locked(() => recvedMsgs.Count);
                     Console.WriteLine($"Stopped subscriber. Recv count: {recvCount}");
                     if (prevRecvCount == recvCount)
@@ -534,12 +544,18 @@ namespace Google.Cloud.PubSub.V1.IntegrationTests
                 return Task.FromResult(SubscriberClient.Reply.Nack);
             });
 
+            using CancellationTokenSource stopCancellation = new CancellationTokenSource();
             var taskDlqSub = dlqSub.StartAsync((msg, ct) =>
             {
                 result.Add((msg.GetDeliveryAttempt(), true));
                 // Received DLQ message, so stop test.
-                sub.StopAsync(TimeSpan.FromSeconds(10));
-                dlqSub.StopAsync(TimeSpan.FromSeconds(10));
+                var shutdownOptions = new ShutdownOptions
+                {
+                    Mode = ShutdownMode.NackImmediately,
+                };
+                stopCancellation.CancelAfter(TimeSpan.FromSeconds(10));
+                sub.StopAsync(shutdownOptions, stopCancellation.Token);
+                dlqSub.StopAsync(shutdownOptions, stopCancellation.Token);
                 return Task.FromResult(SubscriberClient.Reply.Ack);
             });
 
